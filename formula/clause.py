@@ -14,11 +14,11 @@ class Clause:
         self.variables = variables if variables is not None else []
 
         # Remove duplicates
-        self.variables = list(dict.fromkeys(variables))
+        self.variables = list(dict.fromkeys(self.variables))
 
         # Check for LEM
         self.always_sat = any(
-            [v1.id == v2.id for (v1, v2) in combinations(self.variables)]
+            [v1.id == v2.id for (v1, v2) in combinations(self.variables, r=2)]
         )
 
     @property
@@ -42,7 +42,7 @@ class Clause:
 
         # Check for LEM
         self.always_sat = any(
-            [v1.id == v2.id for (v1, v2) in combinations(self.variables)]
+            [v1.id == v2.id for (v1, v2) in combinations(self.variables, r=2)]
         )
 
     def get_variable(self, index: int) -> Variable:
@@ -65,7 +65,7 @@ class Clause:
         Returns:
             bool: True iff clause is satisfied
         """
-        return any([v.is_satisfied(assignment) for v in self.variables])
+        return self.always_sat or any([v.is_satisfied(assignment) for v in self.variables])
 
     def parity(self, vars: List[Variable] = None) -> int:
         """Parity of clause (as defined in notebook.)
