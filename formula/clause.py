@@ -65,7 +65,9 @@ class Clause:
         Returns:
             bool: True iff clause is satisfied
         """
-        return self.always_sat or any([v.is_satisfied(assignment) for v in self.variables])
+        return self.always_sat or any(
+            [v.is_satisfied(assignment) for v in self.variables]
+        )
 
     def parity(self, vars: List[Variable] = None) -> int:
         """Parity of clause (as defined in notebook.)
