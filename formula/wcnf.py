@@ -5,7 +5,9 @@ from pysat.formula import WCNF as PySATWCNF
 
 
 class WCNF(CNF):
-    def __init__(self, clauses: List[Clause] = None, weights: List[float] = None) -> None:
+    def __init__(
+        self, clauses: List[Clause] = None, weights: List[float] = None
+    ) -> None:
         """Weighted CNF formula.
 
         Args:
