@@ -62,7 +62,7 @@ class CNF(Formula):
             bool: True iff satisfied
         """
         assert len(assignment) == self.num_vars
-        return all([c.is_satisfied for c in self.clauses])
+        return all([c.is_satisfied(assignment) for c in self.clauses])
 
     def to_pysat(self) -> PySATCNF:
         """Converts to PySat representation of CNF formula.
