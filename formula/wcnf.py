@@ -21,16 +21,40 @@ class WCNF(CNF):
 
     @property
     def weighted_clauses(self) -> List[Tuple[Clause, float]]:
+        """Zipped clauses and weights
+
+        Returns:
+            List[Tuple[Clause, float]]: List of zipped clauses and weights.
+        """
         return zip(self.clauses, self.weights)
 
     def append(self, clause: Clause, weight: float = 1) -> None:
+        """Add new clause to end of formula with corresponding weight.
+
+        Args:
+            clause (Clause): Clause to be added to end of formula.
+            weight (float, optional): Weight of clause. Defaults to 1.
+        """
         super().append(clause)
         self.weights.append(weight)
 
     def assignment_weight(self, assignment: str) -> float:
+        """Weight of assignment (sum of weights of satisfied clauses).
+
+        Args:
+            assignment (str): Assignment of variables in clauses.
+
+        Returns:
+            float: Weight of assignment.
+        """
         return sum([w * c.is_satisfied(assignment) for (c, w) in self.weighted_clauses])
 
     def to_pysat(self) -> PySATWCNF:
+        """Convert to PySAT representation of formula.
+
+        Returns:
+            PySATWCNF: PySAT representation of formula.
+        """
         pysatcnf = super().to_pysat()
         pysatwcnf = pysatcnf.weighted()
         pysatwcnf.wght = self.weights
