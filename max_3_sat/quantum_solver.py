@@ -44,19 +44,21 @@ class QuantumSolver:
 		for (clause, weight) in wcnf.weighted_clauses:
 			for j, v1 in enumerate(clause.variables):
 				for v2 in clause.variables[j + 1:]:
-					# RZZ gate
-					angle_zz = 0.25 * weight * clause.parity([v1, v2]) * gamma
-					circuit.rzz(angle_zz, v1.id, v2.id)
+					if v1 != v2:
+						# RZZ gate
+						angle_zz = 0.25 * weight * clause.parity([v1, v2]) * gamma
+						circuit.rzz(angle_zz, v1.id, v2.id)
 				# RZ gate
-				angle_z = -0.25 * clause.weight * clause.parity([v1]) * gamma
+				angle_z = -0.25 * weight * clause.parity([v1]) * gamma
 				circuit.rz(angle_z, v1.id)
 			# RZZZ gate
-			angle_zzz = -0.25 * weight * clause.parity() * gamma
-			circuit.cx(clause.get_variable(0).id, clause.get_variable(1).id)
-			circuit.cx(clause.get_variable(1).id, clause.get_variable(2).id)
-			circuit.rz(angle_zzz, clause.get_variable(2).id)
-			circuit.cx(clause.get_variable(1).id, clause.get_variable(2).id)
-			circuit.cx(clause.get_variable(0).id, clause.get_variable(1).id)
+			if clause.get_variable(0) != clause.get_variable(1) and clause.get_variable(1) != clause.get_variable(2):
+				angle_zzz = -0.25 * weight * clause.parity() * gamma
+				circuit.cx(clause.get_variable(0).id, clause.get_variable(1).id)
+				circuit.cx(clause.get_variable(1).id, clause.get_variable(2).id)
+				circuit.rz(angle_zzz, clause.get_variable(2).id)
+				circuit.cx(clause.get_variable(1).id, clause.get_variable(2).id)
+				circuit.cx(clause.get_variable(0).id, clause.get_variable(1).id)
 		return circuit
 
 	def circuit(self, wcnf: WCNF, p: int) -> QuantumCircuit:
@@ -135,7 +137,7 @@ class QuantumSolver:
 			str: Assigment(s) that corresponds to maximum satisfiability.
 		"""
 
-		if any([lambda c: c.num_vars != 3]):
+		if any([c.num_vars != 3 for c in wcnf.clauses]):
 			raise RuntimeError("Instance of non-3-SAT passed to 3SAT solver")
 
 		if init_params is not None and len(init_params) != 2 * layers:
