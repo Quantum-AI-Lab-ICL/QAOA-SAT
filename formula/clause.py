@@ -4,12 +4,15 @@ from functools import reduce
 
 
 class Clause:
-    def __init__(self, variables: List[Variable]) -> None:
-        self.variables = variables
+    def __init__(self, variables: List[Variable] = None) -> None:
+        self.variables = variables if variables is not None else []
 
     @property
     def num_vars(self) -> int:
         return len(self.variables)
+
+    def append(self, variable: Variable) -> None:
+        self.variables.append(variable)
 
     def __repr__(self) -> str:
         return "(" + " ∨ ".join([v.__str__() for v in self.variables]) + ")"

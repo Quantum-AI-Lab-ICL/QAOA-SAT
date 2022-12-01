@@ -6,23 +6,23 @@ from pysat.formula import CNF as PySATCNF
 
 
 class CNF(Formula):
-    def __init__(self, clauses: List[Clause]) -> None:
-        self.clauses = clauses
+    def __init__(self, clauses: List[Clause] = None) -> None:
+        self.clauses = clauses if clauses is not None else []
         self.max_var = 0
-        for clause in clauses:
+        for clause in self.clauses:
             for var in clause.variables:
-                if var.id > max_var:
-                    max_var = var.id
+                if var.id > self.max_var:
+                    self.max_var = var.id
 
     @property
     def num_vars(self) -> int:
-        return self.max_var
+        return self.max_var + 1
 
     def append(self, clause: Clause) -> None:
         self.clauses.append(clause)
         for var in clause.variables:
-            if var.id > max_var:
-                max_var = var.id
+            if var.id > self.max_var:
+                self.max_var = var.id
 
     def __repr__(self) -> str:
         return "∧\n".join([c.__str__() for c in self.clauses]) + "\n"
@@ -44,7 +44,7 @@ class CNF(Formula):
             for var in clause.variables:
                 # PySat starts numbering at 1
                 pysatvar = var.id + 1
-                if var.is_negation():
+                if var.is_negation:
                     # Pysat uses negative to indicate negation
                     pysatvar = -1 * pysatvar
                 pysatclause.append(pysatvar)
