@@ -28,7 +28,7 @@ class WCNF(CNF):
         self.weights.append(weight)
 
     def assignment_weight(self, assignment: str) -> float:
-        return sum([w * c.is_satisfied(assignment) for (w, c) in self.weighted_clauses])
+        return sum([w * c.is_satisfied(assignment) for (c, w) in self.weighted_clauses])
 
     def to_pysat(self) -> PySATWCNF:
         pysatcnf = super().to_pysat()
