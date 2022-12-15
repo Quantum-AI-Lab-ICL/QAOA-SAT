@@ -50,21 +50,22 @@ class QuantumSolver:
                         QuantumCircuit: Quantum circuit with appended cost gates.
         """
         for (clause, weight) in wcnf.weighted_clauses:
+            # Clause satisfied in any assignment
             if clause.always_sat:
-                pass
+                continue
             elif clause.num_vars == 1:
                 # RZ gate
-                angle_z = clause.parity() * gamma
+                angle_z = weight * clause.parity() * gamma
                 v = clause.get_variable(0)
                 circuit.rz(angle_z, v.id)
             elif clause.num_vars == 2:
                 # RZ gates
                 for v in clause.variables:
-                    angle_z = 1.5 * clause.parity([v]) * gamma
+                    angle_z = 0.5 * weight * clause.parity([v]) * gamma
                     circuit.rz(angle_z, v.id)
 
                 # RZZ gate
-                angle_zz = 0.25 * clause.parity() * gamma
+                angle_zz = -0.5 * weight * clause.parity() * gamma
                 v1, v2 = clause.get_variable(0), clause.get_variable(1)
                 circuit.rzz(angle_zz, v1.id, v2.id)
 
@@ -72,18 +73,19 @@ class QuantumSolver:
                 for j, v1 in enumerate(clause.variables):
                     for v2 in clause.variables[j + 1 :]:
                         # RZZ gate
-                        angle_zz = 0.25 * weight * clause.parity([v1, v2]) * gamma
+                        angle_zz = -0.25 * weight * clause.parity([v1, v2]) * gamma
                         circuit.rzz(angle_zz, v1.id, v2.id)
                     # RZ gate
-                    angle_z = -0.25 * weight * clause.parity([v1]) * gamma
+                    angle_z = 0.25 * weight * clause.parity([v1]) * gamma
                     circuit.rz(angle_z, v1.id)
                 # RZZZ gate
-                angle_zzz = -0.25 * weight * clause.parity() * gamma
+                angle_zzz = 0.25 * weight * clause.parity() * gamma
                 circuit.cx(clause.get_variable(0).id, clause.get_variable(1).id)
                 circuit.cx(clause.get_variable(1).id, clause.get_variable(2).id)
                 circuit.rz(angle_zzz, clause.get_variable(2).id)
                 circuit.cx(clause.get_variable(1).id, clause.get_variable(2).id)
                 circuit.cx(clause.get_variable(0).id, clause.get_variable(1).id)
+            circuit.barrier()
         return circuit
 
     def circuit(self, wcnf: WCNF, p: int) -> QuantumCircuit:
