@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 from benchmark.problem import Problem
 from formula.wcnf import WCNF
 from pysat.formula import WCNF as PySATWCNF
@@ -24,3 +24,20 @@ class WeightedProblem(Problem):
             weights = [np.random.rand() * 10 for _ in range(m)]
 
         self.formula = WCNF(self.formula.clauses, weights)
+    
+
+    def approximation_ratio(self, q_sols: Dict[str, float], c_sols: Dict[str, float]) -> float:
+        """Calculate approximation ratio of best quantum to best classical solution.
+
+        Args:
+            q_sols (Dict[str, float]): Quantum solutions ordered by weight.
+            c_sols (Dict[str, float]): Classical solutions ordered by weight.
+
+        Returns:
+            float: Approximation ratio
+        """
+
+        # TODO: Discuss this metric
+
+        return list(q_sols.values())[0] / list(c_sols.values())[0]
+
