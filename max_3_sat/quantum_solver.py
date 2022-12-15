@@ -7,18 +7,51 @@ from qiskit.circuit import Parameter
 from typing import List, Dict
 from qiskit import Aer
 from scipy.optimize import minimize
+from max_3_sat.solver import Solver
 import math
 
 
-class QuantumSolver:
+class QuantumSolver(Solver):
     """Quantum solver for Max-3-SAT problems using QAOA."""
 
-    def __init__(self, top_avg: float = 1) -> None:
-        """ Initialise quantum solver
+    def __init__(
+        self, 
+        wcnf: WCNF,
+        layers: int = 1,
+        init_params: List[float] = None,
+        quantum_instance: QuantumInstance = None,
+        top_avg: float = 1) -> None:
+        """Intialise Quantum Solver for maxsat.
 
         Args:
+            wcnf (WCNF): Weighted CNF formula to find maximum satisfiability of.
+            layers (int, optional): Number of layers in ansatz. Defaults to 1.
+            init_params (List[float], optional): Initial value of parameters for ansatz. Defaults to a list of 1s.
+            quantum_instance (QuantumInstace, optional): Backend to run quantum solver on. Defaults to Aer qasm simulator.
             top_avg (float, optional): Proportion of assignments to consider in expectation calculation. Defaults to 1.
+
+        Raises:
+            RuntimeError: Invalid 3SAT formula
+            RuntimeError: Invalid number of initial parameters
         """
+        if any([c.num_vars > 3 for c in wcnf.clauses]):
+            raise RuntimeError("Instance of non-3-SAT passed to 3SAT solver")
+
+        if init_params is not None and len(init_params) != 2 * layers:
+            raise RuntimeError(
+                f"Invalid number of initial parameters supplied, expected {2 * layers}, received {len(init_params)})"
+            )
+
+        if init_params is None:
+            init_params = [1.0 for _ in range(2 * layers)]
+
+        if quantum_instance is None:
+            quantum_instance = Aer.get_backend("qasm_simulator")
+
+        self.wcnf = wcnf
+        self.layers = layers
+        self.init_params = init_params
+        self.quantum_instance = quantum_instance
         self.top_avg = top_avg
 
     def assignment_weighted_average(
@@ -143,11 +176,10 @@ class QuantumSolver:
                         List[float]: Optimial parameters
         """
         circuit = self.circuit(wcnf, p)
-        backend = Aer.get_backend("qasm_simulator")
 
         def execute_average(param_values: List[float]) -> float:
             bound_circuit = circuit.bind_parameters(param_values)
-            counts = backend.run(bound_circuit, shots=10000).result().get_counts()
+            counts = self.quantum_instance.run(bound_circuit, shots=1024).result().get_counts()
             # Reverse bitstrings due to qiskit ordering
             rev_counts = {s[::-1] : c for (s, c) in counts.items()}
             # -1 * average because we want to maximise but are using scipy minimise
@@ -159,56 +191,34 @@ class QuantumSolver:
 
     def max_sat(
         self,
-        wcnf: WCNF,
-        layers: int = 1,
-        init_params: List[float] = None,
-        quantum_instance: QuantumInstance = None,
         ret_num: int = None,
     ) -> Dict[str, float]:
         """Finds assigment(s) that corresponds to maximum satisfiability.
 
         Args:
-                        wcnf (WCNF): Weighted CNF formula to find maximum satisfiability of.
-                        layers (int, optional): Number of layers in ansatz. Defaults to 1.
-                        init_params (List[float], optional): Initial value of parameters for ansatz. Defaults to None.
-                        ret_num (int): Number of assignments to return (sorted by satisfying weight).
-                                                                        Defaults to None, i.e. assignments ordered by weight.
-
-        Raises:
-                        RuntimeError: Invalid 3SAT formula
-                        RuntimeError: Invalid number of initial parameters
+            ret_num (int): Number of assignments to return (sorted by satisfying weight). Defaults to None, i.e. assignments ordered by weight.
 
         Returns:
-                        str: Assigment(s) that corresponds to maximum satisfiability.
+            str: Assigment(s) that corresponds to maximum satisfiability.
         """
 
-        if any([c.num_vars > 3 for c in wcnf.clauses]):
-            raise RuntimeError("Instance of non-3-SAT passed to 3SAT solver")
+        # Find optimal parameters
+        optimal_params = self.optimal_params(self.wcnf, self.layers, self.init_params)
 
-        if init_params is not None and len(init_params) != 2 * layers:
-            raise RuntimeError(
-                f"Invalid number of initial parameters supplied, expected {2 * layers}, received {len(init_params)})"
-            )
+        # Construct circuit with optimal parameters and measure
+        final_circuit = self.circuit(self.wcnf, self.layers).bind_parameters(optimal_params)
+        counts = self.quantum_instance.run(final_circuit, shots=10000).result().get_counts()
 
-        if init_params is None:
-            init_params = [1.0 for _ in range(2 * layers)]
-
-        optimal_params = self.optimal_params(wcnf, layers, init_params)
-
-        final_circuit = self.circuit(wcnf, layers).bind_parameters(optimal_params)
-
-        if quantum_instance is None:
-            quantum_instance = Aer.get_backend("qasm_simulator")
-
-        counts = quantum_instance.run(final_circuit, shots=10000).result().get_counts()
+        # Order assignments by satisfying weights
         ordered = {}
         ordered_weight = {}
         # Sort and reverse bitstrings to deal with Qiskit qubit ordering
         for (bs, count) in sorted(counts.items(), key=lambda item: item[1], reverse=True):
             rev_string = bs[::-1]
             ordered[rev_string] = count
-            ordered_weight[rev_string] = wcnf.assignment_weight(rev_string)
+            ordered_weight[rev_string] = self.wcnf.assignment_weight(rev_string)
 
+        # Store results
         self.circuit_result = ordered
         self.result = ordered_weight
 
