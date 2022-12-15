@@ -51,7 +51,7 @@ class Problem:
         # Now fill in the rest randomly
         for _ in range(m - len(cnf.clauses)):
             clause = Clause()
-            for _ in range(k):
+            while clause.num_vars < 3:
                 rand_index = np.random.randint(0, 2 * n)
                 clause.append(variables[int(rand_index)])  # pylint complains about int
             cnf.append(clause)
