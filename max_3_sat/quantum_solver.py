@@ -138,13 +138,13 @@ class QuantumSolver:
 
         def execute_average(param_values: List[float]) -> float:
             bound_circuit = circuit.bind_parameters(param_values)
-            counts = backend.run(bound_circuit).result().get_counts()
+            counts = backend.run(bound_circuit, shots=10000).result().get_counts()
+            # Reverse bitstrings due to qiskit ordering
+            rev_counts = {s[::-1] : c for (s, c) in counts.items()}
             # -1 * average because we want to maximise but are using scipy minimise
-            return -1 * self.assignment_weighted_average(wcnf, counts)
+            return -1 * self.assignment_weighted_average(wcnf, rev_counts)
 
         result = minimize(execute_average, init_params, method="COBYLA")
-
-        print(result)
 
         return result.x
 
@@ -191,10 +191,16 @@ class QuantumSolver:
         if quantum_instance is None:
             quantum_instance = Aer.get_backend("qasm_simulator")
 
-        counts = quantum_instance.run(final_circuit).result().get_counts()
-        counts = dict(sorted(counts.items(), key=lambda item: item[1]))
+        counts = quantum_instance.run(final_circuit, shots=10000).result().get_counts()
+        # Sort and reverse bitstrings to deal with Qiskit qubit ordering
+        ordered = {}
+        for (bs, count) in sorted(counts.items(), key=lambda item: item[1], reverse=True):
+            rev_string = bs[::-1]
+            ordered[rev_string] = count
+
+        self.result = ordered
 
         if ret_num is None:
-            return counts.keys()
+            return ordered.keys()
 
-        return list(counts.keys())[:ret_num]
+        return list(ordered.keys())[:ret_num]
