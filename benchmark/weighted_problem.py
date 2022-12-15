@@ -2,6 +2,7 @@ from typing import Dict, List
 from benchmark.problem import Problem
 from formula.wcnf import WCNF
 from pysat.formula import WCNF as PySATWCNF
+from max_3_sat.solver import Solver
 import numpy as np
 
 
@@ -26,18 +27,20 @@ class WeightedProblem(Problem):
         self.formula = WCNF(self.formula.clauses, weights)
     
 
-    def approximation_ratio(self, q_sols: Dict[str, float], c_sols: Dict[str, float]) -> float:
-        """Calculate approximation ratio of best quantum to best classical solution.
+    def weight_ratio(self, solver1: Solver, solver2: Solver) -> float:
+        """Weight ratio of two different solvers on problem instance.
 
         Args:
-            q_sols (Dict[str, float]): Quantum solutions ordered by weight.
-            c_sols (Dict[str, float]): Classical solutions ordered by weight.
+            solver1 (Solver): First solver
+            solver2 (Solver): Second solver
 
         Returns:
-            float: Approximation ratio
+            float: Ratio of satisfying weight of maximal solutions of solvers.
         """
+        # TODO: Discuss this metric. Just one?
 
-        # TODO: Discuss this metric
+        sol1 = list(solver1.max_sat(ret_num=1).values())[0]
+        sol2 = list(solver2.max_sat(ret_num=1).values())[0]
 
-        return list(q_sols.values())[0] / list(c_sols.values())[0]
+        return sol1 / sol2
 
