@@ -7,34 +7,43 @@ from qiskit.circuit import Parameter
 from typing import List, Dict
 from qiskit import Aer
 from scipy.optimize import minimize
+import math
 
 
 class QuantumSolver:
     """Quantum solver for Max-3-SAT problems using QAOA."""
 
-    def __init__(self) -> None:
-        """Initialise Quantum solver."""
-        pass
+    def __init__(self, top_avg: float = 1) -> None:
+        """ Initialise quantum solver
+
+        Args:
+            top_avg (float, optional): Proportion of assignments to consider in expectation calculation. Defaults to 1.
+        """
+        self.top_avg = top_avg
 
     def assignment_weighted_average(
-        self, wcnf: WCNF, assignments: Dict[str, float]
+        self, wcnf: WCNF, assignments: Dict[str, float], alpha: float
     ) -> float:
-        """Find weighted average of assignment weights.
+        """Find weighted average of top alpha proportion of assignment weights.
 
         Args:
                         wcnf (WCNF): Formula assignments are for
                         assignments (Dict[str, float]): Dictionary of assignments and their counts
+                        alpha (float): Proportion of assignments to consider
 
         Returns:
                         float: Weighted average of assignment weights
         """
-        weighted_sum = sum(
-            [
-                count * wcnf.assignment_weight(ass)
-                for (ass, count) in assignments.items()
-            ]
-        )
-        return weighted_sum / sum(assignments.values())
+        assert alpha <= 1 and alpha > 0
+        num_assignments = math.ceil(alpha * len(assignments))
+
+        weighted_sum = 0
+        total_count = 0
+        for (ass, count) in sorted(assignments.items(), key=lambda item: item[1], reverse=True)[:num_assignments]:
+            weighted_sum += count * wcnf.assignment_weight(ass)
+            total_count += count
+
+        return weighted_sum / total_count
 
     def cost_gates(
         self, circuit: QuantumCircuit, wcnf: WCNF, gamma: Parameter
@@ -142,7 +151,7 @@ class QuantumSolver:
             # Reverse bitstrings due to qiskit ordering
             rev_counts = {s[::-1] : c for (s, c) in counts.items()}
             # -1 * average because we want to maximise but are using scipy minimise
-            return -1 * self.assignment_weighted_average(wcnf, rev_counts)
+            return -1 * self.assignment_weighted_average(wcnf, rev_counts, self.top_avg)
 
         result = minimize(execute_average, init_params, method="COBYLA")
 
@@ -155,7 +164,7 @@ class QuantumSolver:
         init_params: List[float] = None,
         quantum_instance: QuantumInstance = None,
         ret_num: int = None,
-    ) -> List[str]:
+    ) -> Dict[str, float]:
         """Finds assigment(s) that corresponds to maximum satisfiability.
 
         Args:
@@ -192,15 +201,18 @@ class QuantumSolver:
             quantum_instance = Aer.get_backend("qasm_simulator")
 
         counts = quantum_instance.run(final_circuit, shots=10000).result().get_counts()
-        # Sort and reverse bitstrings to deal with Qiskit qubit ordering
         ordered = {}
+        ordered_weight = {}
+        # Sort and reverse bitstrings to deal with Qiskit qubit ordering
         for (bs, count) in sorted(counts.items(), key=lambda item: item[1], reverse=True):
             rev_string = bs[::-1]
             ordered[rev_string] = count
+            ordered_weight[rev_string] = wcnf.assignment_weight(rev_string)
 
-        self.result = ordered
+        self.circuit_result = ordered
+        self.result = ordered_weight
 
+        # If no return number of assignments specified, return all
         if ret_num is None:
-            return ordered.keys()
-
-        return list(ordered.keys())[:ret_num]
+            return ordered_weight
+        return dict(list(ordered_weight.items())[:ret_num])
