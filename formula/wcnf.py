@@ -15,7 +15,7 @@ class WCNF(CNF):
             weights (List[float], optional): Weights of clauses. Defaults to all clause weights set to 1.
         """
         super().__init__(clauses)
-        if weights is None and clauses is None:
+        if weights is None and clauses is not None:
             weights = [1 for _ in clauses]
         self.weights = weights
 
