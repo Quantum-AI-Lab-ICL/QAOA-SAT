@@ -8,6 +8,7 @@ from typing import List, Dict
 from qiskit import Aer
 from scipy.optimize import minimize
 from max_3_sat.solver import Solver
+import numpy as np
 import math
 
 
@@ -43,8 +44,9 @@ class QuantumSolver(Solver):
                 f"Invalid number of initial parameters supplied, expected {2 * layers}, received {len(init_params)})"
             )
 
+        # If none supplied, randomly initialise paramterers between 0 and 2*pi
         if init_params is None:
-            init_params = [1.0 for _ in range(2 * layers)]
+            init_params = np.random.uniform(0, 2 * np.pi, 2 * layers) 
 
         if quantum_instance is None:
             quantum_instance = Aer.get_backend("qasm_simulator")

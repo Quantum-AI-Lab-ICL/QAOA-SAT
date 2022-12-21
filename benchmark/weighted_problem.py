@@ -22,7 +22,7 @@ class WeightedProblem(Problem):
         super().__init__(n, m, k)
 
         if weights is None:
-            weights = [np.random.rand() * 10 for _ in range(m)]
+            weights = np.random.uniform(0, 10, m)
 
         self.formula = WCNF(self.formula.clauses, weights)
 
