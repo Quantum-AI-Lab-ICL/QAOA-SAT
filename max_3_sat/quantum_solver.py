@@ -15,12 +15,13 @@ class QuantumSolver(Solver):
     """Quantum solver for Max-3-SAT problems using QAOA."""
 
     def __init__(
-        self, 
+        self,
         wcnf: WCNF,
         layers: int = 1,
         init_params: List[float] = None,
         quantum_instance: QuantumInstance = None,
-        top_avg: float = 1) -> None:
+        top_avg: float = 1,
+    ) -> None:
         """Intialise Quantum Solver for maxsat.
 
         Args:
@@ -60,19 +61,21 @@ class QuantumSolver(Solver):
         """Find weighted average of top alpha proportion of assignment weights.
 
         Args:
-                        wcnf (WCNF): Formula assignments are for
-                        assignments (Dict[str, float]): Dictionary of assignments and their counts
-                        alpha (float): Proportion of assignments to consider
+            wcnf (WCNF): Formula assignments are for
+            assignments (Dict[str, float]): Dictionary of assignments and their counts
+            alpha (float): Proportion of assignments to consider
 
         Returns:
-                        float: Weighted average of assignment weights
+            float: Weighted average of assignment weights
         """
         assert alpha <= 1 and alpha > 0
         num_assignments = math.ceil(alpha * len(assignments))
 
         weighted_sum = 0
         total_count = 0
-        for (ass, count) in sorted(assignments.items(), key=lambda item: item[1], reverse=True)[:num_assignments]:
+        for (ass, count) in sorted(
+            assignments.items(), key=lambda item: item[1], reverse=True
+        )[:num_assignments]:
             weighted_sum += count * wcnf.assignment_weight(ass)
             total_count += count
 
@@ -84,12 +87,12 @@ class QuantumSolver(Solver):
         """Appends gates representing cost function to quantum circuit.
 
         Args:
-                        circuit (QuantumCircuit): Quantum circuit to append gates to.
-                        wcnf (WCNF): Weighted CNF formula to encode
-                        gamma (Parameter): Parameter paramerising cost gates
+            circuit (QuantumCircuit): Quantum circuit to append gates to.
+            wcnf (WCNF): Weighted CNF formula to encode
+            gamma (Parameter): Parameter paramerising cost gates
 
         Returns:
-                        QuantumCircuit: Quantum circuit with appended cost gates.
+            QuantumCircuit: Quantum circuit with appended cost gates.
         """
         for (clause, weight) in wcnf.weighted_clauses:
             # Clause satisfied in any assignment
@@ -134,11 +137,11 @@ class QuantumSolver(Solver):
         """Constructs QAOA circuit to find maximum satisfying assignment.
 
         Args:
-                        wcnf (WCNF): Formula to find maximum satisyfing assignment of.
-                        p (int): Number of layers to use in QAOA circuit ansatz
+            wcnf (WCNF): Formula to find maximum satisyfing assignment of.
+            p (int): Number of layers to use in QAOA circuit ansatz
 
         Returns:
-                        QuantumCircuit: QAOA circuit to optimise parameters across.
+            QuantumCircuit: QAOA circuit to optimise parameters across.
         """
         n = wcnf.num_vars
         qc = QuantumCircuit(n)
@@ -168,20 +171,24 @@ class QuantumSolver(Solver):
         """Finds parameters that minimise expectation of cost hamiltonian on circuit output.
 
         Args:
-                        wcnf (WCNF): Formula that hamiltonian encodes
-                        p (int): Layers in QAOA circuit
-                        init_params (List[float]): Initial parameter values
+            wcnf (WCNF): Formula that hamiltonian encodes
+            p (int): Layers in QAOA circuit
+            init_params (List[float]): Initial parameter values
 
         Returns:
-                        List[float]: Optimial parameters
+            List[float]: Optimial parameters
         """
         circuit = self.circuit(wcnf, p)
 
         def execute_average(param_values: List[float]) -> float:
             bound_circuit = circuit.bind_parameters(param_values)
-            counts = self.quantum_instance.run(bound_circuit, shots=1024).result().get_counts()
+            counts = (
+                self.quantum_instance.run(bound_circuit, shots=1024)
+                .result()
+                .get_counts()
+            )
             # Reverse bitstrings due to qiskit ordering
-            rev_counts = {s[::-1] : c for (s, c) in counts.items()}
+            rev_counts = {s[::-1]: c for (s, c) in counts.items()}
             # -1 * average because we want to maximise but are using scipy minimise
             return -1 * self.assignment_weighted_average(wcnf, rev_counts, self.top_avg)
 
@@ -206,14 +213,20 @@ class QuantumSolver(Solver):
         optimal_params = self.optimal_params(self.wcnf, self.layers, self.init_params)
 
         # Construct circuit with optimal parameters and measure
-        final_circuit = self.circuit(self.wcnf, self.layers).bind_parameters(optimal_params)
-        counts = self.quantum_instance.run(final_circuit, shots=10000).result().get_counts()
+        final_circuit = self.circuit(self.wcnf, self.layers).bind_parameters(
+            optimal_params
+        )
+        counts = (
+            self.quantum_instance.run(final_circuit, shots=10000).result().get_counts()
+        )
 
-        # Order assignments by satisfying weights
+        # Order assignments by measured counts
         ordered = {}
         ordered_weight = {}
         # Sort and reverse bitstrings to deal with Qiskit qubit ordering
-        for (bs, count) in sorted(counts.items(), key=lambda item: item[1], reverse=True):
+        for (bs, count) in sorted(
+            counts.items(), key=lambda item: item[1], reverse=True
+        ):
             rev_string = bs[::-1]
             ordered[rev_string] = count
             ordered_weight[rev_string] = self.wcnf.assignment_weight(rev_string)

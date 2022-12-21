@@ -12,9 +12,9 @@ class Problem:
         """Create problem instance for benchmarking
 
         Args:
-                n (int): Number of variables
-                m (int): Number of clauses
-                k (int): Variables per clause
+            n (int): Number of variables
+            m (int): Number of clauses
+            k (int): Variables per clause
         """
 
         # TODO: remove multiple of 2 when randomness fixed

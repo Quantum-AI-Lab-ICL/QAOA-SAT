@@ -13,10 +13,10 @@ class WeightedProblem(Problem):
         """Create problem instance for benchmarking
 
         Args:
-                n (int): Number of variables
-                m (int): Number of clauses
-                k (int): Variables per clause
-                weights (List[float], optional): Clause weights. Defaults to random weights in the interval (0, 1).
+            n (int): Number of variables
+            m (int): Number of clauses
+            k (int): Variables per clause
+            weights (List[float], optional): Clause weights. Defaults to random weights in the interval (0, 1).
         """
 
         super().__init__(n, m, k)
@@ -25,7 +25,6 @@ class WeightedProblem(Problem):
             weights = [np.random.rand() * 10 for _ in range(m)]
 
         self.formula = WCNF(self.formula.clauses, weights)
-    
 
     def weight_ratio(self, solver1: Solver, solver2: Solver) -> float:
         """Weight ratio of two different solvers on problem instance.
@@ -43,4 +42,3 @@ class WeightedProblem(Problem):
         sol2 = list(solver2.max_sat(ret_num=1).values())[0]
 
         return sol1 / sol2
-
