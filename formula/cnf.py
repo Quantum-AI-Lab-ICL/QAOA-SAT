@@ -61,8 +61,22 @@ class CNF(Formula):
         Returns:
             bool: True iff satisfied
         """
-        assert len(assignment) == self.num_vars
+        if len(assignment) != self.num_vars:
+            raise RuntimeError(f'Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}')
         return all([c.is_satisfied(assignment) for c in self.clauses])
+
+    def assignment_weight(self, assignment: str) -> float:
+        """Weight of assignment (count of satisfied clauses in case of CNF).
+
+        Args:
+            assignment (str): Assignment of variables in clauses.
+
+        Returns:
+            float: Weight of assignment.
+        """
+        if len(assignment) != self.num_vars:
+            raise RuntimeError(f'Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}')
+        return sum([c.is_satisfied(assignment) for c in self.clauses])
 
     def to_pysat(self) -> PySATCNF:
         """Converts to PySat representation of CNF formula.
