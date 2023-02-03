@@ -78,31 +78,31 @@ class RandomKSAT(Problem):
         # Set up variables
         variables = RandomKSAT.variables_from_count(n)
 
-        # First use up all variables
-        variables_unused = [i in range(n)]
-        while len(variables_unused) > 0:
+        # First use up all ids
+        ids_unused = list(range(n))
+        while len(ids_unused) > 0:
             clause = Clause()
-            for i in range(k):
-                # Choose variable
-                rand_index = np.random.randint(0, len(variables_unused))
-                # Choose if negation
+            for _ in range(k):
+                # All ids used up
+                if len(ids_unused) == 0:
+                    cnf.append(clause)
+                    break
+                # Choose id randomly and remove
+                rand_id = np.random.choice(ids_unused)
+                ids_unused.remove(rand_id)
+                # Choose if negation randomly
                 negation = np.random.binomial(1, 0.5, 1)
                 # Access variable
-                rand_var = variables[2 * int(rand_index) + negation] # pylint complains about int
+                rand_var = variables[int(2 * rand_id + negation)]
                 clause.append(rand_var)  
-                variables_unused.remove(rand_index)
-                if len(variables_unused) <= 0:
-                    for _ in range(k - i - 1):
-                        clause.append(rand_var)
-                    break
             cnf.append(clause)
 
         # Now fill in the rest randomly
         for _ in range(m - len(cnf.clauses)):
             clause = Clause()
-            while clause.num_vars < 3:
-                rand_index = np.random.randint(0, 2 * n)
-                clause.append(variables[int(rand_index)])  # pylint complains about int
+            for _ in range(k):
+                rand_var = np.random.choice(variables)
+                clause.append(rand_var)
             cnf.append(clause)
 
         return cls(n, m, k, cnf, weighted)
