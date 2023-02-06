@@ -5,7 +5,6 @@ from formula.wcnf import WCNF
 from benchmark.problem import Problem
 from typing import List
 from benchmark.ratios import sat_ratios
-from max_3_sat.solver import Solver
 import numpy as np
 
 
@@ -109,7 +108,7 @@ class RandomKSAT(Problem):
 
     @classmethod
     def from_poisson(cls, n: int, k: int, r: int = None, weighted: bool = False) -> None:
-        """Create problem instance as per [BM22] (see notebook):
+        """Create problem instance as per [BM22]:
 
         Args:
             n (int): Number of variables.
@@ -151,24 +150,7 @@ class RandomKSAT(Problem):
             float: Weight of assignment.
         """
         if len(assignment) != self.n:
-            raise RuntimeError(f'Invalid assignment: expected length {n}, actual length {len(assignment)}')
+            raise RuntimeError(f'Invalid assignment: expected length {self.n}, actual length {len(assignment)}')
 
         return self.formula.assignment_weight(assignment)
-
-    def weight_ratio(self, solver1: Solver, solver2: Solver) -> float:
-        """Weight ratio of two different solvers on problem instance.
-
-        Args:
-            solver1 (Solver): First solver
-            solver2 (Solver): Second solver
-
-        Returns:
-            float: Ratio of satisfying weight of maximal solutions of solvers.
-        """
-        # TODO: Discuss this metric. Just one?
-
-        sol1 = list(solver1.max_sat(ret_num=1).values())[0]
-        sol2 = list(solver2.max_sat(ret_num=1).values())[0]
-
-        return sol1 / sol2
 
