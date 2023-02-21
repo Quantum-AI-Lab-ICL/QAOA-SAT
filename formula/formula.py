@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from typing import List
 from formula.clause import Clause
 
@@ -12,10 +12,22 @@ class Formula(ABC):
             clauses (List[Clause], optional): Clauses of formula. Defaults to no clauses.
 
         Raises:
-            NotImplementedError: Attempted initialisation of abstract base formula class
+            NotImplementedError: Attempted initialisation of abstract base formula class.
         """
         raise NotImplementedError(
             "Attempted initialisation of abstract base formula class"
+        )
+
+    @abstractproperty
+    def num_vars(self) -> int:
+        """Number of variables in formula.
+
+        Raises:
+            NotImplementedError: Attempted invocation of abstract base formula class property.
+
+        """
+        raise NotImplementedError(
+            "Attempted invocation of abstract base formula class property"
         )
 
     @abstractmethod
@@ -26,11 +38,25 @@ class Formula(ABC):
             assignment (str): Assignment for variables in clauses.
 
         Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class method
+            NotImplementedError: Attempted invocation of abstract base formula class method.
 
-        Returns:
-            bool: True iff all clauses are satisfied
         """
         raise NotImplementedError(
             "Attempted invocation of abstract base formula class method"
         )
+    
+    @abstractmethod
+    def assignment_weight(self, assignment: str) -> float:
+        """Weight of assignment.
+
+        Args:
+            assignment (str): Assignment of variables in clauses.
+
+        Raises:
+            NotImplementedError: Attempted invocation of abstract base formula class method.
+
+        """
+        raise NotImplementedError(
+            "Attempted invocation of abstract base formula class method"
+        )
+        
