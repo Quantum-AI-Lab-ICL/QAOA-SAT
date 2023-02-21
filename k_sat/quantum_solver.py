@@ -5,7 +5,7 @@ from qiskit import QuantumCircuit, Aer
 from qiskit.visualization import plot_histogram
 from qiskit.utils import QuantumInstance
 from qiskit.circuit import Parameter
-from typing import List, Dict, Tuple
+from typing import List, Dict
 from qiskit import Aer, transpile, assemble
 from scipy.optimize import minimize
 from itertools import combinations
@@ -22,18 +22,21 @@ class QuantumSolver(Solver):
 
     def __init__(
         self,
-        cnf: CNF,
+        cnfs: List[CNF],
         layers: int = 1,
         init_params: List[float] = None,
         quantum_instance: QuantumInstance = None,
         top_avg: float = 1,
     ) -> None:
         """Intialise Quantum Solver for maxsat.
+            If multiple CNF formulas are provided, the solver optimises
+            one set of parameters using the average of success probabilities
+            over all instances.
 
         Args:
-            cnf (CNF): CNF formula to find satisfying assignment of.
-            layers (int, optional): Number of layers in ansatz. Defaults to 1.
-            init_params (List[float], optional): Initial value of parameters for ansatz. Defaults to a list of 1s.
+            cnfs (List[CNF]): CNF formulas to find satisfying assignments of.
+            layers (int, optional): Number of layers in ansatzes. Defaults to 1.
+            init_params (List[float], optional): Initial value of parameters for ansatzes. Defaults to a list of 1s.
             quantum_instance (QuantumInstace, optional): Backend to run quantum solver on. Defaults to Aer qasm simulator.
             top_avg (float, optional): Proportion of assignments to consider in expectation calculation. Defaults to 1.
 
@@ -53,7 +56,7 @@ class QuantumSolver(Solver):
         if quantum_instance is None:
             quantum_instance = Aer.get_backend("aer_simulator")
 
-        self.cnf = cnf
+        self.cnfs = cnfs
         self.layers = layers
         self.init_params = init_params
         self.quantum_instance = quantum_instance
@@ -167,88 +170,104 @@ class QuantumSolver(Solver):
             for qubit in qc.qubits:
                 qc.rx(-2 * beta, qubit)
 
-        qc.measure_all()
         return qc
 
-    def find_optimal_params(
-        self, cnf: CNF, p: int, init_params: List[float]
-    ) -> List[float]:
-        """Finds parameters that minimise expectation of cost hamiltonian on circuit output.
-
-        Args:
-            cnf (CNF): Formula that hamiltonian encodes.
-            p (int): Layers in QAOA circuit.
-            init_params (List[float]): Initial parameter values.
+    def find_optimal_params(self) -> List[float]:
+        """Finds parameters that minimise expectation of cost hamiltonian across all circuit outputs.
 
         Returns:
             List[float]: Optimial parameters.
         """
-        circuit = self.construct_circuit(cnf, p)
+        # Construct circuit for each formula
+        circuits = [self.construct_circuit(cnf, self.layers) for cnf in self.cnfs]
 
         def execute_average(param_values: List[float]) -> float:
-            bound_circuit = circuit.bind_parameters(param_values)
-            counts = (
-                self.quantum_instance.run(bound_circuit, shots=1024)
-                .result()
-                .get_counts()
-            )
+            # Bind current set of (same) parameters to each circuit 
+            bound_circuits = [circuit.bind_parameters(param_values) for circuit in circuits]
 
-            # Reverse bitstrings due to qiskit ordering
-            rev_counts = {s[::-1]: c for (s, c) in counts.items()}
+            total_succ_prob = 0
 
-            return self.assignment_weighted_average(cnf, rev_counts, self.top_avg)
+            for (cnf, bound_circuit) in zip(self.cnfs, bound_circuits):
+                # Calculate success probability exactly
+                if self.quantum_instance.options.method == 'statevector':
+                    bound_circuit.save_statevector()
+                    statevector = self.quantum_instance.run(bound_circuit).result().get_statevector()
+                    circ_output = statevector.probabilities_dict()
+                    
+                else:
+                # Simulate measurements on circuit
+                    bound_circuit.measure_all()
+                    circ_output = (
+                        self.quantum_instance.run(bound_circuit, shots=1024)
+                        .result()
+                        .get_counts()
+                    )
+
+                # Reverse bitstrings due to qiskit ordering
+                rev_output = {s[::-1]: c for (s, c) in circ_output.items()}
+
+                total_succ_prob += self.assignment_weighted_average(cnf, rev_output, self.top_avg)
+
+            return total_succ_prob / len(bound_circuits)
 
         # Minimisation formulation of QAOA
-        result = minimize(execute_average, init_params, method="COBYLA")
+        result = minimize(execute_average, self.init_params, method="COBYLA")
 
         return result.x
 
-    def sat(self, timeout: int = None) -> Tuple[str, int]:
-        """Finds statisfying assignment of formula.
+    def sat(self, timeout: int = None) -> Dict[CNF, int]:
+        """Finds statisfying assignments of formulas.
 
         Args:
-            timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None.
+            timeout (int, optional): Timeout for algorithm per instance if no satisfying assignment found yet. Defaults to None.
 
         Returns:
-            Tuple[str, int]: Tuple of satisfying assignment and runtime to find it.
+            Dict[str, int]: Dict of satisfying assignments and runtimes to find them.
         """
 
         print("Finding optimal parameters")
         # Find and store optimal parameters
-        self.optimal_params = self.find_optimal_params(self.cnf, self.layers, self.init_params)
-
+        self.optimal_params = self.find_optimal_params()
         print("Optimal parameters found")
-        # Construct circuit with optimal parameters
-        final_circuit = self.construct_circuit(self.cnf, self.layers).bind_parameters(
-            self.optimal_params
-        )
 
-        print("Sampling from final circuit")
-        # Pre-transpile circuit for efficiency
-        t_fc = transpile(final_circuit, self.quantum_instance)
-        qobj = assemble(t_fc, shots=1)
+        assignments = {}
 
-        # TODO: investigate if this can be done with a callback method
-        # Sample until satisfying assignment found or timeout reached
-        runtime = 0
-        while True:
-            if timeout is not None and runtime > timeout:
-                raise TimeoutError("Bitstring sampling timeout")
-            runtime += 1
-            result = self.quantum_instance.run(qobj, memory=True).result()
-            # Extract and reverse bitstring to deal with qiskit ordering
-            bs = result.get_memory()[0][::-1]
-            if self.cnf.is_satisfied(bs):
-                break
-            if runtime % 10 == 0:
-                print(f'Samples drawn: {runtime}')
+        # Construct circuits with optimal parameters
+        for i, cnf in enumerate(self.cnfs):
+            final_circuit = self.construct_circuit(cnf, self.layers).bind_parameters(
+                self.optimal_params
+            )
+            final_circuit.measure_all()
+            print(f'Sampling assignments for formula {i}')
 
-        return bs, runtime
+            # Pre-transpile circuit for efficiency
+            t_fc = transpile(final_circuit, self.quantum_instance)
+            qobj = assemble(t_fc, shots=1)
 
-    def visualise_result(self, plot_num: int = 10, shots: int = 10000) -> Figure:
+            # TODO: investigate if this can be done with a callback method
+            # Sample until satisfying assignment found or timeout reached
+            runtime = 0
+            while True:
+                if timeout is not None and runtime > timeout:
+                    raise TimeoutError("Bitstring sampling timeout")
+                runtime += 1
+                result = self.quantum_instance.run(qobj, memory=True).result()
+                # Extract and reverse bitstring to deal with qiskit ordering
+                bs = result.get_memory()[0][::-1]
+                if cnf.is_satisfied(bs):
+                    break
+                if runtime % 10 == 0:
+                    print(f'Samples drawn: {runtime}')
+
+            assignments[cnf] = {"ass" : bs, "runtime" : runtime}
+
+        return assignments
+
+    def visualise_result(self, cnf: CNF, plot_num: int = 10, shots: int = 10000) -> Figure:
         """ Visualise output of final optimised circuit.
 
         Args:
+            CNF (CNF): Formula to visualise result for.
             plot_num (int, optional): Number of bitstrings to plot (sorted in descending order of counts). Defaults to 10.
             shots (int, optional): Samples to draw from circuit. Defaults to 10000.
 
@@ -263,11 +282,12 @@ class QuantumSolver(Solver):
             raise RuntimeError("Must run solver before visualising results")
 
         # Construct circuit with optimal parameters
-        final_circuit = self.construct_circuit(self.cnf, self.layers).bind_parameters(
+        final_circuit = self.construct_circuit(cnf, self.layers).bind_parameters(
             self.optimal_params
         )
+        final_circuit.measure_all()
 
         # Measure and reverse bitstrings for qiskit ordering
         counts = {k[::-1] : v for (k, v) in self.quantum_instance.run(final_circuit, shots=shots).result().get_counts().items()}
 
-        return plot_histogram(counts, sort='value_desc', number_to_keep=10) 
+        return plot_histogram(counts, sort='value_desc', number_to_keep=plot_num) 
