@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
+from formula.formula import Formula
 
 
 class Solver(ABC):
-    def __init__(self):
+    def __init__(self, formula: Formula):
         """Abstract Solver class to be extended."""
         super.__init__()
 
