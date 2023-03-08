@@ -73,14 +73,15 @@ class QuantumSolver(Solver):
             optimiser = AverageOptimiser(quantum_instance)
         self.optimiser = optimiser
 
-    def sat(self) -> Tuple[str, int]:
+    def sat(self, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula.
 
+        Args:
+            timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
+
         Returns:
-            Tuple[str, int]: Tuple of satisfying assignment and runtime to find it.
-
+            Tuple[str, int]: Tuple of satisfying assignment and runtime to find it. String set to "-1" formula unsatisfiable/solver timed out.
         """
-
         # Train
         print("Encoding training formulas into quantum circuits")
         training_circuits = [(formula, self.encoder.encode_formula(formula, self.layers)) for formula in self.training_formulas]
@@ -94,4 +95,4 @@ class QuantumSolver(Solver):
 
         # Store for later analysis
         self.evaluator = QAOAEvaluator(circuit, self.formula, optimal_params)
-        return self.evaluator.running_time()
+        return self.evaluator.running_time(timeout)

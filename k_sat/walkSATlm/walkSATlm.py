@@ -25,14 +25,14 @@ class WalkSATlm(Solver):
 		self.w1 = w1
 		self.w2 = w2
 
-	def sat(self, timeout: int = 10000) -> Tuple[str, int]:
-		"""Finds statisfying assignment of formula.
+	def sat(self, timeout: int = None) -> Tuple[str, int]:
+		"""Finds statisfying assignment of formula using WalkSatlm C++ implementation.
 
 		Args:
-			timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to 10000.
+            timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
 		Returns:
-			Tuple[str, int]: Tuple of satisfying assignment and runtime to find it.
+            Tuple[str, int]: Tuple of satisfying assignment and runtime to find it. String set to "-1" formula unsatisfiable/solver timed out.
 		"""
 
 		# Convert formula to pysat to use to_file functionality
@@ -46,11 +46,14 @@ class WalkSATlm(Solver):
 		cnf_filename = f'{dir}/formula.cnf'
 		formula_ps.to_file(cnf_filename)
 
+		# If timeout is None use arbitrarily large number that doesn't cause overflow
+		timeout = 10000 if timeout is None else timeout
+
 		# Call c++ binary
 		cmd_str = f'./WalkSatlm2013 formula.cnf {self.seed} {self.p} {self.w1} {self.w2} {timeout}'
 		subprocess.run(cmd_str, shell=True, cwd = dir, stdout=subprocess.DEVNULL)
 
-		# Parse result
+		# Parse result. N.B. assignment of -1 is unsatisfiable instance/timeout
 		res_filename = f'{dir}/result.json'
 		json_result = json.load(open(res_filename, 'r'))
 		assignment = ''.join([str(x) for x in json_result["result"]])

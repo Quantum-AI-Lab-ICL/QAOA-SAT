@@ -13,9 +13,9 @@ class Solver(ABC):
         """Finds statisfying assignment of formula.
 
         Args:
-            timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None.
+            timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:
-            Tuple[str, int]: Tuple of satisfying assignment and runtime to find it.
+            Tuple[str, int]: Tuple of satisfying assignment and runtime to find it. String set to "-1" formula unsatisfiable/solver timed out.
         """
         pass
