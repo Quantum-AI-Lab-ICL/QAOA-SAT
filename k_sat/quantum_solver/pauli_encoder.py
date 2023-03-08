@@ -82,6 +82,7 @@ class PauliEncoder(QAOAEncoder):
 		# Create alternating mixer and cost gates
 		for i in range(p):
 
+			# TODO: optimise to not re-encode clause each time for p > 1
 			# Cost gates
 			gamma = Parameter(f"y_{i}")
 			for clause in formula.clauses:
