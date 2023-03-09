@@ -8,27 +8,26 @@ from formula.formula import Formula
 
 class WalkSATlm(Solver):
 	""" Python interface for WalkSATlm solver [Cai15]"""
-	def __init__(self, formula: Formula, seed: int = 42, p: float = 0.15, w1: float = 6.0, w2: float = 5.0) -> None:
+	def __init__(self, seed: int = 42, p: float = 0.15, w1: float = 6.0, w2: float = 5.0) -> None:
 		"""Python interface for WalkSATlm solver [Cai15]
 
 		Args:
-			formula (Formula): Formula to find satisfying assignment for.
 			seed (int, optional): Random seed for number generation. Defaults to 42.
 			p (float, optional): Probability of choosing variable to flip in clause randomly. Defaults to 0.15.
 			w1 (float, optional): Weight of make1 score function. Defaults to 6.0.
 			w2 (float, optional): Weight of make2 score function. Defaults to 5.0.
 		"""
 
-		self.formula = formula
 		self.seed = seed
 		self.p = p
 		self.w1 = w1
 		self.w2 = w2
 
-	def sat(self, timeout: int = None) -> Tuple[str, int]:
+	def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
 		"""Finds statisfying assignment of formula using WalkSatlm C++ implementation.
 
 		Args:
+			formula (Formula): Formula to find satisfying assignment for.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
 		Returns:
@@ -36,7 +35,7 @@ class WalkSATlm(Solver):
 		"""
 
 		# Convert formula to pysat to use to_file functionality
-		formula_ps = self.formula.to_pysat()
+		formula_ps = formula.to_pysat()
 
 		# Use correct directory
 		parent_dir = os.path.dirname(os.getcwd())

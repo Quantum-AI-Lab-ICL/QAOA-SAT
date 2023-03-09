@@ -17,7 +17,6 @@ class QuantumSolver(Solver):
 
     def __init__(
         self,
-        formula: Formula,
         training_formulas: List[Formula] = None,
         layers: int = 1,
         quantum_instance: QuantumInstance = None,
@@ -28,7 +27,6 @@ class QuantumSolver(Solver):
         """Intialise Quantum Solver for k-SAT.
 
         Args:
-            formula (Formula): Formula to find satisfying assignment of.
             training_formulas (List[Formula], optional): Formulas to use for parameter optimisation. Defaults to formula.
             layers (int, optional): Number of layers in ansatzes. Defaults to 1.
             quantum_instance (QuantumInstace, optional): Backend to run quantum solver on. Defaults to Aer qasm simulator.
@@ -40,11 +38,7 @@ class QuantumSolver(Solver):
             RuntimeError: Invalid number of initial parameters
 
         """
-        self.formula = formula
 
-        # If no training formulas specified, tailor training to formula itself
-        if training_formulas is None:
-            training_formulas = [formula]
         self.training_formulas = training_formulas
 
         self.layers = layers
@@ -73,26 +67,30 @@ class QuantumSolver(Solver):
             optimiser = AverageOptimiser(quantum_instance)
         self.optimiser = optimiser
 
-    def sat(self, timeout: int = None) -> Tuple[str, int]:
+    def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula.
 
         Args:
+            formula (Formula): Formula to find satisfying assignment of.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:
             Tuple[str, int]: Tuple of satisfying assignment and runtime to find it. String set to "-1" formula unsatisfiable/solver timed out.
         """
+        # If no training formulas specified, tailor training to formula itself
+        training_formulas = self.training_formulas if self.training_formulas is not None else formula
+
         # Train
         print("Encoding training formulas into quantum circuits")
-        training_circuits = [(formula, self.encoder.encode_formula(formula, self.layers)) for formula in self.training_formulas]
+        training_circuits = [(formula, self.encoder.encode_formula(formula, self.layers)) for formula in training_formulas]
 
         print("Finding optimal parameters for training circuits")
         optimal_params = self.optimiser.find_optimal_params(self.init_params, training_circuits)
 
         # Evaluate
         print("Finding/evaluating satisfying assignment")
-        circuit = self.encoder.encode_formula(self.formula, self.layers)
+        circuit = self.encoder.encode_formula(formula, self.layers)
 
         # Store for later analysis
-        self.evaluator = QAOAEvaluator(circuit, self.formula, optimal_params)
+        self.evaluator = QAOAEvaluator(circuit, formula, optimal_params)
         return self.evaluator.running_time(timeout)

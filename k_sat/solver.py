@@ -4,15 +4,16 @@ from formula.formula import Formula
 
 
 class Solver(ABC):
-    def __init__(self, formula: Formula):
+    def __init__(self):
         """Abstract Solver class to be extended."""
         super.__init__()
 
     @abstractmethod
-    def sat(self, timeout: int = None) -> Tuple[str, int]:
+    def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula.
 
         Args:
+			formula (Formula): Formula to find satisfying assignment for.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:
