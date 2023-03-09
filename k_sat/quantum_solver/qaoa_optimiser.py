@@ -7,7 +7,6 @@ from formula.formula import Formula
 
 
 class QAOAOptimiser(ABC):
-
     def __init__(self, quantum_instance: QuantumInstance = None):
         """Abstract optimiser class to be extended.
 
@@ -23,11 +22,13 @@ class QAOAOptimiser(ABC):
         )
 
     @abstractmethod
-    def find_optimal_params(self, circuits: List[Tuple[Formula, QuantumCircuit]]) -> List[float]:
+    def find_optimal_params(
+        self, circuits: List[Tuple[Formula, QuantumCircuit]]
+    ) -> List[float]:
         """Encode formula into quantum circuit.
 
         Args:
-            circuits (List[Tuple[Formula, QuantumCircuit]]): Circuits and corresponding formulas to optimise over. 
+            circuits (List[Tuple[Formula, QuantumCircuit]]): Circuits and corresponding formulas to optimise over.
 
 
         Raises:

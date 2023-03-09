@@ -62,7 +62,9 @@ class CNF(Formula):
             bool: True iff satisfied
         """
         if len(assignment) != self.num_vars:
-            raise RuntimeError(f'Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}')
+            raise RuntimeError(
+                f"Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}"
+            )
         return all([c.is_satisfied(assignment) for c in self.clauses])
 
     def assignment_weight(self, assignment: str) -> float:
@@ -75,7 +77,9 @@ class CNF(Formula):
             float: Weight of assignment.
         """
         if len(assignment) != self.num_vars:
-            raise RuntimeError(f'Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}')
+            raise RuntimeError(
+                f"Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}"
+            )
         return sum([not c.is_satisfied(assignment) for c in self.clauses])
 
     def to_pysat(self) -> PySATCNF:

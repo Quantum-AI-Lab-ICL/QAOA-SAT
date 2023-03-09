@@ -8,7 +8,7 @@ from benchmark.ratios import sat_ratios
 import numpy as np
 
 
-class RandomKSAT():
+class RandomKSAT:
     """Class to create random problem instances for benchmarking"""
 
     def __init__(self, n: int, m: int, k: int, cnfs: List[CNF]) -> None:
@@ -28,7 +28,7 @@ class RandomKSAT():
 
     @classmethod
     def variables_from_count(cls, c: int) -> List[Variable]:
-        """ Generate $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
+        """Generate $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
 
         Args:
             count (int): Id to generate up to.
@@ -55,21 +55,23 @@ class RandomKSAT():
         Returns:
             bool: Boolean variable set to true iff formula is satisfiable.
         """
-        
+
         # Use WalkSATlm if no solver specified
         if solver is None:
             solver = WalkSATlm(f)
-        
+
         # If not solved within timeout consider unsatisfiable ("-1" indicates this)
         assignment, _ = solver.sat(timeout)
         return assignment != -1
 
     @classmethod
-    def from_exhaustive(cls, n: int, m: int, k: int, satisfiable = False, instances: int = 1) -> None:
+    def from_exhaustive(
+        cls, n: int, m: int, k: int, satisfiable=False, instances: int = 1
+    ) -> None:
         """Create problem instances as follows:
             - Uniformly choose at random from $\{x_0, ~x_0, ... x_{n-1}, ~x_{n-1}\}$ without replacement until all used
             - Uniformly choose at random from ${x_0, ~x_0, ... x_{n-1}, ~x_{n-1}\}$ with replacement
-            - Ensures clauses have $k$ different literals (not necessarily different variables, e.g. can suffer from LEM) 
+            - Ensures clauses have $k$ different literals (not necessarily different variables, e.g. can suffer from LEM)
 
         Args:
             n (int): Number of variables per instance.
@@ -113,7 +115,7 @@ class RandomKSAT():
                     negation = np.random.binomial(1, 0.5, 1)
                     # Access variable
                     rand_var = variables[int(2 * rand_id + negation)]
-                    clause.append(rand_var)  
+                    clause.append(rand_var)
                 cnf.append(clause)
 
             # Now fill in the rest randomly
@@ -136,7 +138,9 @@ class RandomKSAT():
         return cls(n, m, k, cnfs)
 
     @classmethod
-    def from_poisson(cls, n: int, k: int, r: int = None, satisfiable = False, instances: int = 1) -> None:
+    def from_poisson(
+        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1
+    ) -> None:
         """Create problem instance as per [BM22]:
 
         Args:

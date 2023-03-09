@@ -47,7 +47,9 @@ class WCNF(CNF):
         Returns:
             float: Weight of assignment.
         """
-        return sum([w * (not c.is_satisfied(assignment)) for (c, w) in self.weighted_clauses])
+        return sum(
+            [w * (not c.is_satisfied(assignment)) for (c, w) in self.weighted_clauses]
+        )
 
     def to_pysat(self) -> PySATWCNF:
         """Convert to PySAT representation of formula.

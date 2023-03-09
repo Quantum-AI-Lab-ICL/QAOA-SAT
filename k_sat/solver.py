@@ -13,7 +13,7 @@ class Solver(ABC):
         """Finds statisfying assignment of formula.
 
         Args:
-			formula (Formula): Formula to find satisfying assignment for.
+                        formula (Formula): Formula to find satisfying assignment for.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:

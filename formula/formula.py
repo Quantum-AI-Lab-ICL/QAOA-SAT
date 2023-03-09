@@ -44,7 +44,7 @@ class Formula(ABC):
         raise NotImplementedError(
             "Attempted invocation of abstract base formula class method"
         )
-    
+
     @abstractmethod
     def assignment_weight(self, assignment: str) -> float:
         """Weight of assignment.
@@ -59,4 +59,3 @@ class Formula(ABC):
         raise NotImplementedError(
             "Attempted invocation of abstract base formula class method"
         )
-        

@@ -22,7 +22,9 @@ class AverageOptimiser(QAOAOptimiser):
 
         self.quantum_instance = quantum_instance
 
-    def assignment_weighted_average(self, formula: Formula, assignments: Dict[str, float]) -> float:
+    def assignment_weighted_average(
+        self, formula: Formula, assignments: Dict[str, float]
+    ) -> float:
         """Find weighted average of assignment weights (unsatisfied clauses).
 
         Args:
@@ -40,13 +42,15 @@ class AverageOptimiser(QAOAOptimiser):
 
         return weighted_sum / total_count
 
-    def find_optimal_params(self, init_params : List[float], circuits: List[Tuple[Formula, QuantumCircuit]]) -> List[float]:
-        """Finds parameters that minimise expectation of cost hamiltonian 
-			across all circuit outputs.
+    def find_optimal_params(
+        self, init_params: List[float], circuits: List[Tuple[Formula, QuantumCircuit]]
+    ) -> List[float]:
+        """Finds parameters that minimise expectation of cost hamiltonian
+                        across all circuit outputs.
 
         Args:
             init_params (List[float]): Initial circuit parameters (applied to all circuits).
-            circuits (List[Tuple[Formula, QuantumCircuit]]): Circuits and corresponding formulas to optimise over. 
+            circuits (List[Tuple[Formula, QuantumCircuit]]): Circuits and corresponding formulas to optimise over.
 
         Returns:
             List[float]: Optimal parameters.
@@ -59,13 +63,17 @@ class AverageOptimiser(QAOAOptimiser):
             for (cnf, circuit) in circuits:
                 bound_circuit = circuit.bind_parameters(param_values)
                 # Calculate success probability exactly
-                if self.quantum_instance.options.method == 'statevector':
+                if self.quantum_instance.options.method == "statevector":
                     bound_circuit.save_statevector()
-                    statevector = self.quantum_instance.run(bound_circuit).result().get_statevector()
+                    statevector = (
+                        self.quantum_instance.run(bound_circuit)
+                        .result()
+                        .get_statevector()
+                    )
                     circ_output = statevector.probabilities_dict()
-                    
+
                 else:
-                # Simulate measurements on circuit
+                    # Simulate measurements on circuit
                     bound_circuit.measure_all()
                     circ_output = (
                         self.quantum_instance.run(bound_circuit, shots=1024)

@@ -20,11 +20,11 @@ class QAOAEncoder(ABC):
         """Encode formula into quantum circuit.
 
         Args:
-			formula (Formula): Boolean formula to be encoded.
-			p (int, optional): Number of repeated layers in circuit. Defaults to 1.
+                        formula (Formula): Boolean formula to be encoded.
+                        p (int, optional): Number of repeated layers in circuit. Defaults to 1.
 
         Returns:
-			QuantumCircuit: Circuit encoding formula.
+                        QuantumCircuit: Circuit encoding formula.
 
         Raises:
             NotImplementedError: Attempted invocation of abstract base encoder class method.

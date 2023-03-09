@@ -22,7 +22,7 @@ class QuantumSolver(Solver):
         quantum_instance: QuantumInstance = None,
         init_params: List[float] = None,
         encoder: QAOAEncoder = None,
-        optimiser: QAOAOptimiser = None
+        optimiser: QAOAOptimiser = None,
     ) -> None:
         """Intialise Quantum Solver for k-SAT.
 
@@ -56,10 +56,10 @@ class QuantumSolver(Solver):
             raise RuntimeError(
                 f"Invalid number of initial parameters supplied, expected {2 * layers}, received {len(init_params)})"
             )
-        # If not specified, initialise gamma_i = -0.01, beta_i = 0.01 [BM22] 
+        # If not specified, initialise gamma_i = -0.01, beta_i = 0.01 [BM22]
         if init_params is None:
-            init_params = [-0.01, 0.01] * layers 
-        
+            init_params = [-0.01, 0.01] * layers
+
         self.init_params = init_params
 
         # If not specified use average optimiser (non-CvAR)
@@ -78,14 +78,21 @@ class QuantumSolver(Solver):
             Tuple[str, int]: Tuple of satisfying assignment and runtime to find it. String set to "-1" formula unsatisfiable/solver timed out.
         """
         # If no training formulas specified, tailor training to formula itself
-        training_formulas = self.training_formulas if self.training_formulas is not None else formula
+        training_formulas = (
+            self.training_formulas if self.training_formulas is not None else formula
+        )
 
         # Train
         print("Encoding training formulas into quantum circuits")
-        training_circuits = [(formula, self.encoder.encode_formula(formula, self.layers)) for formula in training_formulas]
+        training_circuits = [
+            (formula, self.encoder.encode_formula(formula, self.layers))
+            for formula in training_formulas
+        ]
 
         print("Finding optimal parameters for training circuits")
-        optimal_params = self.optimiser.find_optimal_params(self.init_params, training_circuits)
+        optimal_params = self.optimiser.find_optimal_params(
+            self.init_params, training_circuits
+        )
 
         # Evaluate
         print("Finding/evaluating satisfying assignment")
