@@ -105,7 +105,6 @@ class QuantumSolver(Solver):
         self.optimal_params = optimal_params
         return self.evaluator.running_time(circuit, formula, optimal_params, timeout)
 
-
     def visualise_result(
         self,
         formula: Formula,
@@ -133,7 +132,9 @@ class QuantumSolver(Solver):
         quantum_instance = Aer.get_backend("aer_simulator")
 
         # Add measurement operation to circuit
-        circuit = self.encoder.encode_formula(formula).bind_parameters(self.optimal_params)
+        circuit = self.encoder.encode_formula(formula).bind_parameters(
+            self.optimal_params
+        )
         circuit.measure_all()
 
         # Measure and reverse bitstrings for qiskit ordering
