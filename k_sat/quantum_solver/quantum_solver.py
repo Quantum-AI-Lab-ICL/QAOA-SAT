@@ -2,6 +2,8 @@ from qiskit import Aer
 from qiskit.utils import QuantumInstance
 from typing import List, Tuple
 from qiskit import Aer
+from qiskit.visualization import plot_histogram
+from matplotlib.figure import Figure
 
 from formula.formula import Formula
 from k_sat.solver import Solver
@@ -79,7 +81,7 @@ class QuantumSolver(Solver):
         """
         # If no training formulas specified, tailor training to formula itself
         training_formulas = (
-            self.training_formulas if self.training_formulas is not None else formula
+            self.training_formulas if self.training_formulas is not None else [formula]
         )
 
         # Train
@@ -99,5 +101,48 @@ class QuantumSolver(Solver):
         circuit = self.encoder.encode_formula(formula, self.layers)
 
         # Store for later analysis
-        self.evaluator = QAOAEvaluator(circuit, formula, optimal_params)
-        return self.evaluator.running_time(timeout)
+        self.evaluator = QAOAEvaluator()
+        self.optimal_params = optimal_params
+        return self.evaluator.running_time(circuit, formula, optimal_params, timeout)
+
+
+    def visualise_result(
+        self,
+        formula: Formula,
+        plot_num: int = 10,
+        shots: int = 10000,
+    ) -> Figure:
+        """Visualise output of solving circuit for given formula.
+
+        Args
+                formula (Formula): Formula to visualise encoded circuit of.
+                plot_num (int, optional): Number of bitstrings to plot (sorted in descending order of counts). Defaults to 10.
+                shots (int, optional): Samples to draw from circuit. Defaults to 10000.
+
+        Raises:
+                RuntimeError: Must run solver before visualising results.
+
+        Returns:
+                Figure: Histogram of samples drawn.
+        """
+
+        if self.optimal_params is None:
+            raise RuntimeError("Must run solver before visualising results")
+
+        # Initialise simulator
+        quantum_instance = Aer.get_backend("aer_simulator")
+
+        # Add measurement operation to circuit
+        circuit = self.encoder.encode_formula(formula).bind_parameters(self.optimal_params)
+        circuit.measure_all()
+
+        # Measure and reverse bitstrings for qiskit ordering
+        counts = {
+            k[::-1]: v
+            for (k, v) in quantum_instance.run(circuit, shots=shots)
+            .result()
+            .get_counts()
+            .items()
+        }
+
+        return plot_histogram(counts, sort="value_desc", number_to_keep=plot_num)

@@ -1,8 +1,6 @@
 from qiskit import QuantumCircuit, Aer
-from qiskit.visualization import plot_histogram
 from typing import List, Tuple
 from qiskit import transpile, assemble
-from matplotlib.figure import Figure
 
 from formula.formula import Formula
 
@@ -98,46 +96,3 @@ class QAOAEvaluator:
         bs = "-1" if timeout else bs
 
         return bs, runtime
-
-    def visualise_result(
-        self,
-        circuit: QuantumCircuit,
-        parameters: List[float] = None,
-        plot_num: int = 10,
-        shots: int = 10000,
-    ) -> Figure:
-        """Visualise output of final optimised circuit.
-
-        Args
-                circuit (QuantumCircuit): Circuit to be evaluated.
-                parameters (List[float], optional): Parameters to bind to circuit. Defaults to None (if already bound).
-                plot_num (int, optional): Number of bitstrings to plot (sorted in descending order of counts). Defaults to 10.
-                shots (int, optional): Samples to draw from circuit. Defaults to 10000.
-
-        Raises:
-                RuntimeError: Must run solver before visualising results.
-
-        Returns:
-                Figure: Histogram of samples drawn.
-        """
-        # Bind parameters if needed
-        if parameters is not None:
-            circuit = circuit.bind_parameters(parameters)
-
-        # Initialise simulator
-        quantum_instance = Aer.get_backend("aer_simulator")
-
-        # Add measurement operation to circuit
-        circuit = circuit.copy()
-        circuit.measure_all()
-
-        # Measure and reverse bitstrings for qiskit ordering
-        counts = {
-            k[::-1]: v
-            for (k, v) in quantum_instance.run(circuit, shots=shots)
-            .result()
-            .get_counts()
-            .items()
-        }
-
-        return plot_histogram(counts, sort="value_desc", number_to_keep=plot_num)
