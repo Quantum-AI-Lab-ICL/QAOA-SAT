@@ -4,10 +4,10 @@ from typing import List, Dict, Tuple
 from scipy.optimize import minimize
 
 from formula.formula import Formula
-from k_sat.quantum_solver.qaoa_optimiser import QAOAOptimiser
+from k_sat.qiskit_solver.optimiser import Optimiser
 
 
-class AverageOptimiser(QAOAOptimiser):
+class AverageOptimiser(Optimiser):
     """Optimiser to find parameters for QAOA circuit."""
 
     def __init__(self, quantum_instance: QuantumInstance = None) -> None:

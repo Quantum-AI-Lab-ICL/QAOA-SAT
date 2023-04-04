@@ -6,7 +6,8 @@ from qiskit.utils import QuantumInstance
 from formula.formula import Formula
 
 
-class QAOAOptimiser(ABC):
+class Optimiser(ABC):
+    @abstractmethod
     def __init__(self, quantum_instance: QuantumInstance = None):
         """Abstract optimiser class to be extended.
 

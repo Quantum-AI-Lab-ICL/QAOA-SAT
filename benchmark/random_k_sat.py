@@ -58,10 +58,11 @@ class RandomKSAT:
 
         # Use WalkSATlm if no solver specified
         if solver is None:
-            solver = WalkSATlm(f)
+            solver = WalkSATlm()
 
         # If not solved within timeout consider unsatisfiable ("-1" indicates this)
-        assignment, _ = solver.sat(timeout)
+        assignment, steps = solver.sat(f, timeout)
+        print(f'Walksatlm took {steps} steps')
         return assignment != -1
 
     @classmethod

@@ -4,7 +4,7 @@ from qiskit import QuantumCircuit
 from formula.formula import Formula
 
 
-class QAOAEncoder(ABC):
+class Encoder(ABC):
     def __init__(self):
         """Abstract encoder class to be extended.
 

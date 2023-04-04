@@ -7,14 +7,14 @@ from matplotlib.figure import Figure
 
 from formula.formula import Formula
 from k_sat.solver import Solver
-from k_sat.quantum_solver.qaoa_encoder import QAOAEncoder
-from k_sat.quantum_solver.qaoa_optimiser import QAOAOptimiser
-from k_sat.quantum_solver.pauli_encoder import PauliEncoder
-from k_sat.quantum_solver.average_optimiser import AverageOptimiser
-from k_sat.quantum_solver.qaoa_evaluator import QAOAEvaluator
+from k_sat.qiskit_solver.encoder import Encoder
+from k_sat.qiskit_solver.optimiser import Optimiser
+from k_sat.qiskit_solver.pauli_encoder import PauliEncoder
+from k_sat.qiskit_solver.average_optimiser import AverageOptimiser
+from k_sat.qiskit_solver.evaluator import Evaluator
 
 
-class QuantumSolver(Solver):
+class QiskitSolver(Solver):
     """Quantum solver for k-SAT problems using QAOA."""
 
     def __init__(
@@ -23,8 +23,8 @@ class QuantumSolver(Solver):
         layers: int = 1,
         quantum_instance: QuantumInstance = None,
         init_params: List[float] = None,
-        encoder: QAOAEncoder = None,
-        optimiser: QAOAOptimiser = None,
+        encoder: Encoder = None,
+        optimiser: Optimiser = None,
     ) -> None:
         """Intialise Quantum Solver for k-SAT.
 
@@ -32,9 +32,9 @@ class QuantumSolver(Solver):
             training_formulas (List[Formula], optional): Formulas to use for parameter optimisation. Defaults to formula.
             layers (int, optional): Number of layers in ansatzes. Defaults to 1.
             quantum_instance (QuantumInstace, optional): Backend to run quantum solver on. Defaults to Aer qasm simulator.
-            encoder (QAOAEncoder, optional): Encoder to encode formula into circuit. Defaults to PauliEncoder.
+            encoder (Encoder, optional): Encoder to encode formula into circuit. Defaults to PauliEncoder.
             init_params (List[float], optional): Initial value of parameters for ansatzes. Defaults to a list of 1s.
-            optimiser (QAOAOptimiser, optional): Optimiser to find optimal circuit parameters. Defaults to AverageOptimiser.
+            optimiser (Optimiser, optional): Optimiser to find optimal circuit parameters. Defaults to AverageOptimiser.
 
         Raises:
             RuntimeError: Invalid number of initial parameters
@@ -101,7 +101,7 @@ class QuantumSolver(Solver):
         circuit = self.encoder.encode_formula(formula, self.layers)
 
         # Store for later analysis
-        self.evaluator = QAOAEvaluator()
+        self.evaluator = Evaluator()
         self.optimal_params = optimal_params
         return self.evaluator.running_time(circuit, formula, optimal_params, timeout)
 

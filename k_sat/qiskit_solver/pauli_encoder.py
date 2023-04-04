@@ -6,10 +6,10 @@ from itertools import combinations
 
 from formula.formula import Formula
 from formula.clause import Clause
-from k_sat.quantum_solver.qaoa_encoder import QAOAEncoder
+from k_sat.qiskit_solver.encoder import Encoder
 
 
-class PauliEncoder(QAOAEncoder):
+class PauliEncoder(Encoder):
     """Encoder of Boolean formula into Quantum circuit."""
 
     def __init__(self) -> None:

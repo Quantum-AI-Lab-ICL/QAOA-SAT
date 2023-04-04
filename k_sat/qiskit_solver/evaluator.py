@@ -5,7 +5,7 @@ from qiskit import transpile, assemble
 from formula.formula import Formula
 
 
-class QAOAEvaluator:
+class Evaluator:
     """Evaluates QAOA circuit's ability to find a satisfying
     assignment for a problem instance."""
 
