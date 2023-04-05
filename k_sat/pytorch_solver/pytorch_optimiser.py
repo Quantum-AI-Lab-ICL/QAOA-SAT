@@ -8,7 +8,7 @@ from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 
 class PytorchOptimiser():
     
-	def __init__(self, circuit: PytorchCircuit, optimiser: Optimizer = None, epochs: int = 1000) -> None:
+	def __init__(self, circuit: PytorchCircuit, optimiser: Optimizer = None, epochs: int = 250) -> None:
 		self.circuit = circuit 
 
 		if optimiser is None:
@@ -31,5 +31,5 @@ class PytorchOptimiser():
 			p_succ = torch.mean(p_succs)
 			p_succ.backward()
 			self.optimiser.step()
-			if i % 100 == 0:
+			if i % 50 == 0:
 				print(f'Success probability: {p_succ.item()}')
