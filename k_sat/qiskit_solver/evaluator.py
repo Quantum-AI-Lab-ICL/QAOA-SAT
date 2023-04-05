@@ -75,13 +75,13 @@ class Evaluator:
         qobj = assemble(t_fc, shots=1)
 
         # Timeout flag
-        timeout = False
+        tf = False
 
         # Sample until satisfying assignment found or timeout reached
         runtime = 0
         while True:
             if timeout is not None and runtime > timeout:
-                timeout = True
+                tf = True
                 break
             runtime += 1
             result = quantum_instance.run(qobj, memory=True).result()
@@ -93,6 +93,6 @@ class Evaluator:
                 print(f"Samples drawn: {runtime}")
 
         # Set bitstring to -1 if timeout
-        bs = "-1" if timeout else bs
+        bs = "-1" if tf else bs
 
         return bs, runtime
