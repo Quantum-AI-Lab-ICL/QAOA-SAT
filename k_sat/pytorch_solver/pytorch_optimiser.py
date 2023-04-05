@@ -1,0 +1,35 @@
+import torch
+from torch.optim import Optimizer
+from torch.utils.data import DataLoader
+from typing import List
+
+from formula.formula import Formula
+from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
+
+class PytorchOptimiser():
+    
+	def __init__(self, circuit: PytorchCircuit, optimiser: Optimizer = None, epochs: int = 1000) -> None:
+		self.circuit = circuit 
+
+		if optimiser is None:
+			optimiser = torch.optim.Adam(circuit.parameters(), lr=0.01, maximize=True)
+		self.optimiser = optimiser
+
+		self.epochs = epochs
+
+
+	def find_optimal_params(self, formulas: List[Formula]) -> None:
+
+		# TODO: parallelise this!
+		# extract clause counts 
+		counts = [(f.naive_counts, f.naive_sats) for f in formulas]
+
+		# optimise
+		for i in range(self.epochs):
+			self.optimiser.zero_grad()
+			p_succs = torch.stack([self.circuit(h, hS) for (h, hS) in counts])
+			p_succ = torch.mean(p_succs)
+			p_succ.backward()
+			self.optimiser.step()
+			if i % 100 == 0:
+				print(f'Success probability: {p_succ.item()}')
