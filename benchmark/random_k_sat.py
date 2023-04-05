@@ -1,11 +1,14 @@
+from typing import List, Union
+import numpy as np
+from pysat.solvers import Glucose4
+from pysat.solvers import Solver as PySATSolver
+
 from formula.clause import Clause
 from formula.variable import Variable
 from formula.cnf import CNF
 from k_sat.solver import Solver
 from k_sat.walkSATlm.walkSATlm import WalkSATlm
-from typing import List
 from benchmark.ratios import sat_ratios
-import numpy as np
 
 
 class RandomKSAT:
@@ -44,26 +47,20 @@ class RandomKSAT:
         return variables
 
     @classmethod
-    def is_satisfiable(cls, f: CNF, solver: Solver = None, timeout: int = 1000) -> bool:
+    def is_satisfiable(cls, f: CNF) -> bool:
         """Verify if formula is satisfiable.
 
         Args:
             f (CNF): Formula to check satisfiability of.
-            solver (Solver, optional): Solver to use. Defaults to WalkSatlm.
-            timeout (int, optional): Timeout to consider formula unsatisfiable at. Defaults to 1000 steps.
 
         Returns:
             bool: Boolean variable set to true iff formula is satisfiable.
         """
 
-        # Use WalkSATlm if no solver specified
-        if solver is None:
-            solver = WalkSATlm()
+        g = Glucose4()
+        g.append_formula(f.to_pysat())
+        return g.solve()
 
-        # If not solved within timeout consider unsatisfiable ("-1" indicates this)
-        assignment, steps = solver.sat(f, timeout)
-        print(f'Walksatlm took {steps} steps')
-        return assignment != -1
 
     @classmethod
     def from_exhaustive(
