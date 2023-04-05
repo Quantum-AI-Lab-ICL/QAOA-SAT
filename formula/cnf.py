@@ -147,7 +147,6 @@ class CNF(Formula):
         pcnf = self.to_pysat()
         pcnf.to_file(filename)
 
-
     @property
     def naive_sats(self) -> Iterable[int]:
         """Finds all satisfying bitstrings. Use singleton pattern to only evaluate once.

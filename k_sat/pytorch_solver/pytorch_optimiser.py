@@ -1,6 +1,5 @@
 import torch
 from torch.optim import Optimizer
-from torch.utils.data import DataLoader
 from typing import List
 
 from formula.formula import Formula
@@ -9,6 +8,13 @@ from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 class PytorchOptimiser():
     
 	def __init__(self, circuit: PytorchCircuit, optimiser: Optimizer = None, epochs: int = 250) -> None:
+		"""Pytorch implementation of optimiser for QAOA circuit parameters.
+
+		Args:
+			circuit (PytorchCircuit): Pytorch circuit being optimised over.
+			optimiser (Optimizer, optional): Classical optimiser to use for circuit parameters. Defaults to Adam, lr = 0.01
+			epochs (int, optional): Epochs to train for. Defaults to 250.
+		"""
 		self.circuit = circuit 
 
 		if optimiser is None:
@@ -19,6 +25,11 @@ class PytorchOptimiser():
 
 
 	def find_optimal_params(self, formulas: List[Formula]) -> None:
+		"""Finds optimal parameters of circuit by maximising success probability over provided formulas.
+
+		Args:
+			formulas (List[Formula]): Formulas to maximise success probability over.
+		"""
 
 		# TODO: parallelise this!
 		# extract clause counts 

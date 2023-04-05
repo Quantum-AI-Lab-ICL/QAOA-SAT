@@ -14,6 +14,12 @@ class PytorchSolver(Solver):
         training_formulas: List[Formula] = None,
         layers: int = 1
 	) -> None:
+		"""Pytorch implementation of QAOA for satisfiability.
+
+		Args:
+			training_formulas (List[Formula], optional): Formulas to train parameters on. Defaults to formula being solved for.
+			layers (int, optional): Layers in QAOA circuit. Defaults to 1.
+		"""
 		self.training_formulas = training_formulas
 		self.layers = layers
 

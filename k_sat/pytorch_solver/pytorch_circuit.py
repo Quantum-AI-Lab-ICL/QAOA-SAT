@@ -5,6 +5,14 @@ from torch import Tensor
 class PytorchCircuit(torch.nn.Module):
     
 	def __init__(self, num_vars: int, layers: int = 1, init_gamma: Tensor = None, init_beta: Tensor = None) -> None:
+		"""Pytorch implementation of QAOA circuit for satisfiability solving.
+
+		Args:
+			num_vars (int): Number of variables in satisfiability problem.
+			layers (int, optional): QAOA circuit layers. Defaults to 1.
+			init_gamma (Tensor, optional): Initial cost unitary parameter values. Defaults to all -0.01.
+			init_beta (Tensor, optional): Initial mixing unitary parameter values. Defaults to all 0.01.
+		"""
 		super(PytorchCircuit, self).__init__()
 
 		if init_gamma is None:
@@ -29,12 +37,31 @@ class PytorchCircuit(torch.nn.Module):
 		self.initial = circuit
 
 	def cost(self, circuit: Tensor, gamma: Tensor, h: Tensor) -> Tensor:
+		"""Apply cost unitary to state.
+
+		Args:
+			circuit (Tensor): State cost unitary is being applied to.
+			gamma (Tensor): Parameter parameterising cost unitary.
+			h (Tensor): Tensor of unsatisfied clauses per bitstring.
+
+		Returns:
+			Tensor: Costed state.
+		"""
 		hg = torch.complex(torch.tensor(0.), h * gamma)
 		hg_exp = torch.exp(hg)
 		circuit = hg_exp * circuit
 		return circuit
 
-	def mix(self, circuit: Tensor, beta: Tensor):
+	def mix(self, circuit: Tensor, beta: Tensor) -> Tensor:
+		"""Apply mixing unitary to state.
+
+		Args:
+			circuit (Tensor): State mixing unitary is being applied to.
+			beta (Tensor): Parameter parameterising mixing unitary.
+
+		Returns:
+			Tensor: Mixed state.
+		"""
 		cg = torch.complex(torch.cos(beta), torch.tensor(0.))
 		sg = torch.complex(torch.tensor(0.), torch.sin(beta))
 
@@ -54,12 +81,29 @@ class PytorchCircuit(torch.nn.Module):
 		
 		return circuit
 
-	def succ_prob(self, circuit: Tensor, hS: Tensor):
+	def succ_prob(self, circuit: Tensor, hS: Tensor) -> Tensor:
+		"""Success probability on output state.
+
+		Args:
+			circuit (Tensor): Output state.
+			hS (Tensor): 1 iff bitstring satisfies problem (in bitstring order).
+
+		Returns:
+			Tensor: Success probability.
+		"""
 		# Find inner product of each state
 		ps = (circuit * circuit.conj()).real
 		return torch.dot(ps, hS)
 
 	def evolve(self, h: Tensor) -> Tensor:
+		"""Apply QAOA unitary to initial state.
+
+		Args:
+			h (Tensor): Tensor of unsatisfied clauses per bitstring.
+
+		Returns:
+			Tensor: Final state.
+		"""
 
 		circuit = self.initial
 
@@ -72,6 +116,15 @@ class PytorchCircuit(torch.nn.Module):
 
 
 	def forward(self, h: Tensor, hS: Tensor) -> Tensor:
+		"""Application of QAOA circuit to calculate success probability.
+
+		Args:
+			h (Tensor): Tensor of unsatisfied clauses per bitstring.
+			hS (Tensor): 1 iff bitstring satisfies problem (in bitstring order).
+
+		Returns:
+			Tensor: Success probability of evolved initial state with inputs.
+		"""
 
 		# Evolve
 		circuit = self.evolve(h)
