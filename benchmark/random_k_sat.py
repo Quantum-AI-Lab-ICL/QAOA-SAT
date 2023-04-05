@@ -1,32 +1,30 @@
-from typing import List, Union
+from typing import List
+import os
 import numpy as np
 from pysat.solvers import Glucose4
-from pysat.solvers import Solver as PySATSolver
 
 from formula.clause import Clause
 from formula.variable import Variable
 from formula.cnf import CNF
-from k_sat.solver import Solver
-from k_sat.walkSATlm.walkSATlm import WalkSATlm
 from benchmark.ratios import sat_ratios
 
 
 class RandomKSAT:
     """Class to create random problem instances for benchmarking"""
 
-    def __init__(self, n: int, m: int, k: int, cnfs: List[CNF]) -> None:
+    def __init__(self, n: int, k: int, r: float, cnfs: List[CNF]) -> None:
         """Create problem instances for benchmarking.
 
         Args:
             n (int): Number of variables per instance.
-            m (int): Number of clauses per instance.
             k (int): Variables per clause per instance.
+            r (float): Clause density per instance.
             cnfs (CNF): Formulas of instances.
         """
 
         self.n = n
-        self.m = m
         self.k = k
+        self.r = r
         self.formulas = cnfs
 
     @classmethod
@@ -133,11 +131,11 @@ class RandomKSAT:
             cnfs.append(cnf)
             i += 1
 
-        return cls(n, m, k, cnfs)
+        return cls(n, k, n/m, cnfs)
 
     @classmethod
     def from_poisson(
-        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1
+        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: bool = False
     ) -> None:
         """Create problem instance as per [BM22]:
 
@@ -147,15 +145,24 @@ class RandomKSAT:
             r (int, optional): Clauses to variables ratio for poisson method. Defaults to satisfiability ratio.
             satisfiable (bool) : Ensures the instances generated are satisfiable. Defaults to False.
             instances (int): Number of instances to generate. Defaults to 1.
+            from_file (bool): If true, retrieve from previously generated files. Defaults to False.
 
         Returns:
             CNF: Random problem instances created using poisson method.
         """
+        cnfs = []
+
+        if from_file:
+            for i in range(instances):
+                parent_dir = os.path.dirname(os.getcwd())
+                dir = f"{parent_dir}/benchmark/instances/n_{n}"
+                cnf_filename = f"{dir}/f_n{n}_k{k}_{i}.cnf"
+                cnfs.append(CNF.from_file(cnf_filename))
+            return cls(n, k, r, cnfs)
+
         # Use approximate satisfiability if r not specified
         if r is None:
             r = sat_ratios[k]
-
-        cnfs = []
 
         i = 0
         while i < instances:
@@ -183,4 +190,4 @@ class RandomKSAT:
             cnfs.append(cnf)
             i += 1
 
-        return cls(n, m, k, cnfs)
+        return cls(n, k, r, cnfs)
