@@ -2,6 +2,7 @@ from typing import List
 import os
 import numpy as np
 from pysat.solvers import Glucose4
+from pathos.multiprocessing import ProcessingPool as Pool
 
 from formula.clause import Clause
 from formula.variable import Variable
@@ -135,7 +136,7 @@ class RandomKSAT:
 
     @classmethod
     def from_poisson(
-        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: bool = False
+        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: bool = False, calc_naive: bool = False
     ) -> None:
         """Create problem instance as per [BM22]:
 
@@ -146,6 +147,7 @@ class RandomKSAT:
             satisfiable (bool) : Ensures the instances generated are satisfiable. Defaults to False.
             instances (int): Number of instances to generate. Defaults to 1.
             from_file (bool): If true, retrieve from previously generated files. Defaults to False.
+            calc_naive (bool): Find number of unsatisfied clauses per bistring in formulas. Defaults to False.
 
         Returns:
             CNF: Random problem instances created using poisson method.
@@ -158,36 +160,45 @@ class RandomKSAT:
                 dir = f"{parent_dir}/benchmark/instances/n_{n}"
                 cnf_filename = f"{dir}/f_n{n}_k{k}_{i}.cnf"
                 cnfs.append(CNF.from_file(cnf_filename))
-            return cls(n, k, r, cnfs)
+                i
+        else:
+            # Use approximate satisfiability if r not specified
+            if r is None:
+                r = sat_ratios[k]
 
-        # Use approximate satisfiability if r not specified
-        if r is None:
-            r = sat_ratios[k]
+            i = 0
+            while i < instances:
+                # Set up formula
+                cnf = CNF()
 
-        i = 0
-        while i < instances:
-            # Set up formula
-            cnf = CNF()
+                # Set up variables
+                variables = RandomKSAT.variables_from_count(n)
 
-            # Set up variables
-            variables = RandomKSAT.variables_from_count(n)
+                # Uniformly sample from variables
+                m = np.random.poisson(r * n)
+                for _ in range(m):
+                    clause = Clause()
+                    for _ in range(k):
+                        rand_index = int(np.random.randint(0, 2 * n))
+                        clause.append(variables[rand_index])
+                    cnf.append(clause)
 
-            # Uniformly sample from variables
-            m = np.random.poisson(r * n)
-            for _ in range(m):
-                clause = Clause()
-                for _ in range(k):
-                    rand_index = int(np.random.randint(0, 2 * n))
-                    clause.append(variables[rand_index])
-                cnf.append(clause)
+                # If formula not satisfiable, try again
+                if satisfiable and not RandomKSAT.is_satisfiable(cnf):
+                    print("Unsatisfiable formula generated, trying again")
+                    continue
 
-            # If formula not satisfiable, try again
-            if satisfiable and not RandomKSAT.is_satisfiable(cnf):
-                print("Unsatisfiable formula generated, trying again")
-                continue
+                # If formula is satisfiable, save it
+                cnfs.append(cnf)
+                i += 1
 
-            # If formula is satisfiable, save it
-            cnfs.append(cnf)
-            i += 1
+        # Calculate unsatisfied clauses per bistring per formula
+        if calc_naive:
+            with Pool(processes=4) as pool:
+                # Each process gets a copy of the 
+                naives = pool.map(lambda f : f.naive_counts, cnfs)
+                for (n, f) in zip(naives, cnfs):
+                    f.counts = n
+                    f.naive_sats
 
         return cls(n, k, r, cnfs)
