@@ -3,6 +3,7 @@ import torch
 
 from formula.formula import Formula
 from formula.clause import Clause
+from formula.variable import Variable
 from pysat.formula import CNF as PySATCNF
 
 
@@ -22,6 +23,36 @@ class CNF(Formula):
 
         self.counts = None
         self.sats = None
+
+    @classmethod
+    def from_pysat(cls, formula: PySATCNF) -> None:
+        """Creates formula from pysat formula.
+
+        Args:
+            formula (PySATFormula): Pysat formula to use.
+        """
+
+        clauses = []
+        for clause in formula.clauses:
+            c = Clause()
+            for var in clause:
+                # PySat starts numbering at 1 and uses negative to indicate negation
+                v = Variable(abs(var) - 1, is_negation = var < 0)
+                c.append(v)
+            clauses.append(c)
+        return cls(clauses)
+
+    @classmethod
+    def from_file(cls, filename: str) -> None:
+        """Creates formula from CNF file.
+
+        Args:
+            filename (str): File to read from.
+        """
+
+        # Use PySAT as interface
+        pcnf = PySATCNF(from_file=filename)
+        return CNF.from_pysat(pcnf)
 
     @property
     def num_vars(self) -> int:
@@ -104,6 +135,18 @@ class CNF(Formula):
                 pysatclause.append(pysatvar)
             pysatcnf.append(pysatclause)
         return pysatcnf
+
+    def to_file(self, filename: str) -> None:
+        """Converts to CNF file representation of formula.
+
+        Args:
+            filename (str): File to write to.
+        """
+
+        # Use PySAT as interface
+        pcnf = self.to_pysat()
+        pcnf.to_file(filename)
+
 
     @property
     def naive_sats(self) -> Iterable[int]:
