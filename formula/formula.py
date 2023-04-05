@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod, abstractproperty
-from typing import List
+from typing import Iterable, List
 from formula.clause import Clause
 
 
@@ -51,6 +51,36 @@ class Formula(ABC):
 
         Args:
             assignment (str): Assignment of variables in clauses.
+
+        Raises:
+            NotImplementedError: Attempted invocation of abstract base formula class method.
+
+        """
+        raise NotImplementedError(
+            "Attempted invocation of abstract base formula class method"
+        )
+
+    @abstractproperty
+    def naive_sats(self) -> Iterable[int]:
+        """Finds all satisfying bitstrings. Use singleton pattern to only evaluate once.
+
+        Returns:
+            Iterable[int]: Value at index 1 iff bitstring satisfies, in bistring order.
+
+        Raises:
+            NotImplementedError: Attempted invocation of abstract base formula class method.
+
+        """
+        raise NotImplementedError(
+            "Attempted invocation of abstract base formula class method"
+        )
+
+    @abstractproperty
+    def naive_counts(self) -> Iterable[int]:
+        """Finds number of unsatisfied clauses for all bitstrings. Use singleton pattern to only evaluate once.
+
+        Returns:
+            Iterable[int]: Number of unsatisfied clauses in bistring order.
 
         Raises:
             NotImplementedError: Attempted invocation of abstract base formula class method.

@@ -1,7 +1,8 @@
-from typing import List
+from typing import Iterable, List
+import torch
+
 from formula.formula import Formula
 from formula.clause import Clause
-from formula.variable import Variable
 from pysat.formula import CNF as PySATCNF
 
 
@@ -18,6 +19,9 @@ class CNF(Formula):
             for var in clause.variables:
                 if var.id > self.max_var:
                     self.max_var = var.id
+
+        self.counts = None
+        self.sats = None
 
     @property
     def num_vars(self) -> int:
@@ -100,6 +104,32 @@ class CNF(Formula):
                 pysatclause.append(pysatvar)
             pysatcnf.append(pysatclause)
         return pysatcnf
+
+    @property
+    def naive_sats(self) -> Iterable[int]:
+        """Finds all satisfying bitstrings. Use singleton pattern to only evaluate once.
+
+        Returns:
+            Iterable[int]: Value at index 1 iff bitstring satisfies, in bistring order.
+
+        """
+        if self.sats is None:
+            naive_counts = self.naive_counts
+            self.sats = torch.where(naive_counts == 0., 1., 0.) 
+        return self.sats
+
+    @property
+    def naive_counts(self) -> Iterable[int]:
+        """Finds number of unsatisfied clauses for all bitstrings. Use singleton pattern to only evaluate once.
+
+        Returns:
+            Iterable[int]: Number of unsatisfied clauses in bistring order.
+        """
+        if self.counts is None:
+            n = self.num_vars
+            N = 2 ** n
+            self.counts = torch.tensor([self.assignment_weight(bin(i)[2:].zfill(n)) for i in range(N)], dtype=torch.float32)
+        return self.counts
 
     def __repr__(self) -> str:
         return "∧\n".join([c.__str__() for c in self.clauses]) + "\n"
