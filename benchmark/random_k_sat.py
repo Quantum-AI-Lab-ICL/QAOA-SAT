@@ -3,6 +3,8 @@ import os
 import numpy as np
 from pysat.solvers import Glucose4
 from pathos.multiprocessing import ProcessingPool as Pool
+import h5py
+import torch 
 
 from formula.clause import Clause
 from formula.variable import Variable
@@ -155,12 +157,21 @@ class RandomKSAT:
         cnfs = []
 
         if from_file:
+            # Retrieve instances from previously written files
             for i in range(instances):
                 parent_dir = os.path.dirname(os.getcwd())
                 dir = f"{parent_dir}/benchmark/instances/n_{n}"
                 cnf_filename = f"{dir}/f_n{n}_k{k}_{i}.cnf"
-                cnfs.append(CNF.from_file(cnf_filename))
-                i
+                cnf = CNF.from_file(cnf_filename)
+
+                # Retrieve unsat clauses counts
+                if calc_naive:
+                    counts_filename = f"{dir}/f_n{n}_k{k}_{i}.hdf5"
+                    with h5py.File(counts_filename, 'r') as f:
+                        cnf.counts = torch.from_numpy(f.get('counts')[:])
+
+                cnfs.append(cnf)
+
         else:
             # Use approximate satisfiability if r not specified
             if r is None:
@@ -192,13 +203,13 @@ class RandomKSAT:
                 cnfs.append(cnf)
                 i += 1
 
-        # Calculate unsatisfied clauses per bistring per formula
-        if calc_naive:
-            with Pool(processes=4) as pool:
-                # Each process gets a copy of the 
-                naives = pool.map(lambda f : f.naive_counts, cnfs)
-                for (n, f) in zip(naives, cnfs):
-                    f.counts = n
-                    f.naive_sats
+            # Calculate unsatisfied clauses per bistring per formula
+            if calc_naive:
+                with Pool(processes=4) as pool:
+                    # Each process gets a copy of the class so have to return result
+                    naives = pool.map(lambda f : f.naive_counts, cnfs)
+                    for (n, f) in zip(naives, cnfs):
+                        f.counts = n
+                        f.naive_sats
 
         return cls(n, k, r, cnfs)
