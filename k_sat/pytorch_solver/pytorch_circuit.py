@@ -86,14 +86,17 @@ class PytorchCircuit(torch.nn.Module):
 
 		Args:
 			circuit (Tensor): Output state.
-			hS (Tensor): 1 iff bitstring satisfies problem (in bitstring order).
+			hS (Tensor): Indices of satisfying assignments. 
 
 		Returns:
 			Tensor: Success probability.
 		"""
+		# Only consider satisfying assignments (very sparse)
+		ps = circuit[hS]
+
 		# Find inner product of each state
-		ps = (circuit * circuit.conj()).real
-		return torch.dot(ps, hS)
+		ps = (ps * ps.conj()).real
+		return torch.sum(ps)
 
 	def evolve(self, h: Tensor) -> Tensor:
 		"""Apply QAOA unitary to initial state.
