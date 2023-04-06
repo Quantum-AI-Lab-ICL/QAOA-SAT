@@ -31,16 +31,15 @@ class PytorchOptimiser():
 			formulas (List[Formula]): Formulas to maximise success probability over.
 		"""
 
-		# TODO: parallelise this!
 		# extract clause counts 
 		counts = [(f.naive_counts, f.naive_sats) for f in formulas]
 
 		# optimise
-		for i in range(self.epochs):
+		for i in range(self.epochs + 1):
 			self.optimiser.zero_grad()
 			p_succs = torch.stack([self.circuit(h, hS) for (h, hS) in counts])
 			p_succ = torch.mean(p_succs)
 			p_succ.backward()
 			self.optimiser.step()
-			if i % 50 == 0:
-				print(f'Success probability: {p_succ.item()}')
+			if i % 10 == 0:
+				print(f'Epoch {i}, p_succ: {p_succ.item()}')

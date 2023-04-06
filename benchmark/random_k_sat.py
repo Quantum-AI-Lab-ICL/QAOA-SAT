@@ -138,7 +138,7 @@ class RandomKSAT:
 
     @classmethod
     def from_poisson(
-        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: bool = False, calc_naive: bool = False
+        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: int = None, calc_naive: bool = False
     ) -> None:
         """Create problem instance as per [BM22]:
 
@@ -148,7 +148,7 @@ class RandomKSAT:
             r (int, optional): Clauses to variables ratio for poisson method. Defaults to satisfiability ratio.
             satisfiable (bool) : Ensures the instances generated are satisfiable. Defaults to False.
             instances (int): Number of instances to generate. Defaults to 1.
-            from_file (bool): If true, retrieve from previously generated files. Defaults to False.
+            from_file (int): If not None, retrieve from previously generated files starting at index provided. Defaults to None.
             calc_naive (bool): Find number of unsatisfied clauses per bistring in formulas. Defaults to False.
 
         Returns:
@@ -156,17 +156,17 @@ class RandomKSAT:
         """
         cnfs = []
 
-        if from_file:
+        if from_file is not None:
             # Retrieve instances from previously written files
             for i in range(instances):
                 parent_dir = os.path.dirname(os.getcwd())
                 dir = f"{parent_dir}/benchmark/instances/n_{n}"
-                cnf_filename = f"{dir}/f_n{n}_k{k}_{i}.cnf"
+                cnf_filename = f"{dir}/f_n{n}_k{k}_{i + from_file}.cnf"
                 cnf = CNF.from_file(cnf_filename)
 
                 # Retrieve unsat clauses counts
                 if calc_naive:
-                    counts_filename = f"{dir}/f_n{n}_k{k}_{i}.hdf5"
+                    counts_filename = f"{dir}/f_n{n}_k{k}_{i + from_file}.hdf5"
                     with h5py.File(counts_filename, 'r') as f:
                         cnf.counts = torch.from_numpy(f.get('counts')[:])
 
