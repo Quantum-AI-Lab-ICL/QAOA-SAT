@@ -1,6 +1,6 @@
 from typing import Iterable, List
-import torch
-import concurrent.futures
+import numpy as np
+
 
 from formula.formula import Formula
 from formula.clause import Clause
@@ -158,7 +158,7 @@ class CNF(Formula):
         """
         if self.sats is None:
             naive_counts = self.naive_counts
-            self.sats = torch.where(naive_counts == 0.) 
+            self.sats = np.where(naive_counts == 0.) 
         return self.sats
 
     @property
@@ -172,7 +172,7 @@ class CNF(Formula):
             n = self.num_vars
             N = 2 ** n
             bs = [bin(i)[2:].zfill(n) for i in range(N)]
-            self.counts = torch.tensor([self.assignment_weight(b) for b in bs], dtype=torch.float32)
+            self.counts = np.array([self.assignment_weight(b) for b in bs], dtype=np.float32)
         return self.counts
 
     def __repr__(self) -> str:
