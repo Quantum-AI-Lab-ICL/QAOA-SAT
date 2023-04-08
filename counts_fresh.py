@@ -5,12 +5,9 @@ import os
 from benchmark.random_k_sat import RandomKSAT
 
 def main(n, k, i):
-	parent_dir = os.path.dirname(os.getcwd())
-	dir = f"{parent_dir}/QAOA-SAT/benchmark/instances/n_{n}"
-	filename = f"{dir}/f_n{n}_k{k}_{i + 1100}"
-	cnf = RandomKSAT.from_poisson(n, k, calc_naive=True).formulas[0]
-	cnf.to_file(f'{filename}.cnf')
-	with h5py.File(f'{filename}.hdf5', 'w') as file:
+	cnf = RandomKSAT.from_poisson(n, k, calc_naive=True)
+	cnf.to_file(RandomKSAT.filename(n, k, i + 1100))
+	with h5py.File(RandomKSAT.filename(n, k, i + 1100, 'hdf5'), 'w') as file:
 		file.create_dataset('counts', data=cnf.naive_counts)
 
 if __name__ == '__main__':
