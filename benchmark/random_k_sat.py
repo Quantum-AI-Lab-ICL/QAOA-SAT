@@ -31,6 +31,25 @@ class RandomKSAT:
         self.formulas = cnfs
 
     @classmethod
+    def filename(cls, n: int, k: int, index: int = 0, suffix: str = "cnf") -> str:
+        """Get filename corresponding to CNF problem.
+
+        Args:
+            n (int): Number of variables per instance.
+            k (int): Variables per clause per instance.
+            index (int, optional): File index. Defaults to 0.
+            suffix (int, optional): File suffix. Defaults to cnf.
+
+        Returns:
+            str: Filename correspondin to CNF problem.
+        """
+        parent_dir = os.path.dirname(os.getcwd())
+        dir = f'{parent_dir}/benchmark/instances/n_{n}'
+        cnf_filename = f'{dir}/f_n{n}_k{k}_{index}.{suffix}'
+        return cnf_filename
+
+
+    @classmethod
     def variables_from_count(cls, c: int) -> List[Variable]:
         """Generate $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
 
@@ -159,14 +178,13 @@ class RandomKSAT:
         if from_file is not None:
             # Retrieve instances from previously written files
             for i in range(instances):
-                parent_dir = os.path.dirname(os.getcwd())
-                dir = f"{parent_dir}/benchmark/instances/n_{n}"
-                cnf_filename = f"{dir}/f_n{n}_k{k}_{i + from_file}.cnf"
+                index = i + from_file
+                cnf_filename = RandomKSAT.filename(n, k, index)
                 cnf = CNF.from_file(cnf_filename)
 
                 # Retrieve unsat clauses counts
                 if calc_naive:
-                    counts_filename = f"{dir}/f_n{n}_k{k}_{i + from_file}.hdf5"
+                    counts_filename = RandomKSAT.filename(n, k, index, 'hdf5')
                     with h5py.File(counts_filename, 'r') as f:
                         cnf.counts = torch.from_numpy(f.get('counts')[:])
 
