@@ -199,17 +199,10 @@ class RandomKSAT:
                     print("Unsatisfiable formula generated, trying again")
                     continue
 
-                # If formula is satisfiable, save it
+                if calc_naive:
+                    cnf.naive_counts
+
                 cnfs.append(cnf)
                 i += 1
-
-            # Calculate unsatisfied clauses per bistring per formula
-            if calc_naive:
-                with Pool(processes=4) as pool:
-                    # Each process gets a copy of the class so have to return result
-                    naives = pool.map(lambda f : f.naive_counts, cnfs)
-                    for (n, f) in zip(naives, cnfs):
-                        f.counts = n
-                        f.naive_sats
 
         return cls(n, k, r, cnfs)
