@@ -43,8 +43,7 @@ class RandomKSAT:
         Returns:
             str: Filename correspondin to CNF problem.
         """
-        parent_dir = os.path.dirname(os.getcwd())
-        dir = f'{parent_dir}/benchmark/instances/n_{n}'
+        dir = f'/vol/bitbucket/ae719/instances/n_{n}'
         cnf_filename = f'{dir}/f_n{n}_k{k}_{index}.{suffix}'
         return cnf_filename
 
