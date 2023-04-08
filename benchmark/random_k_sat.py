@@ -173,7 +173,7 @@ class RandomKSAT:
 
     @classmethod
     def from_poisson(
-        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: int = None, calc_naive: bool = False
+        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: int = None, calc_naive: bool = False, parallelise: bool = False
     ) -> None:
         """Create problem instance as per [BM22]:
 
@@ -185,16 +185,15 @@ class RandomKSAT:
             instances (int): Number of instances to generate. Defaults to 1.
             from_file (int): If not None, retrieve from previously generated files starting at index provided. Defaults to None.
             calc_naive (bool): Find number of unsatisfied clauses per bistring in formulas. Defaults to False.
+            parallelise (bool): Parallelise creation. Defaults to False.
 
         Returns:
             CNF: Random problem instances created using poisson method.
         """
-        cnfs = []
 
         if from_file is not None:
-            # Retrieve instances from previously written files
-            for i in range(instances):
-                index = i + from_file
+            
+            def retrieve(index):
                 cnf_filename = RandomKSAT.filename(n, k, index)
                 cnf = CNF.from_file(cnf_filename)
 
@@ -203,16 +202,24 @@ class RandomKSAT:
                     counts_filename = RandomKSAT.filename(n, k, index, 'hdf5')
                     with h5py.File(counts_filename, 'r') as f:
                         cnf.counts = torch.from_numpy(f.get('counts')[:])
+                return cnf
 
-                cnfs.append(cnf)
+            # Retrieve instances from previously written files
+            indices = [i + from_file for i in range(instances)]
+            if parallelise:
+                with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
+                    cnfs = list(executor.map(retrieve, indices))
+            else:
+                cnfs = [retrieve(i) for i in indices] 
 
         else:
             # Use approximate satisfiability if r not specified
             if r is None:
                 r = sat_ratios[k]
 
-            i = 0
-            while i < instances:
+            def generate(t: int):
+                if t < 0:
+                    raise RuntimeError("Avoiding stack overflow, check satisfiability.")
                 # Set up formula
                 cnf = CNF()
 
@@ -231,7 +238,8 @@ class RandomKSAT:
                 # If formula not satisfiable, try again
                 if satisfiable and not RandomKSAT.is_satisfiable(cnf):
                     print("Unsatisfiable formula generated, trying again")
-                    continue
+                    # t to avoid stack overflow!
+                    return generate(t-1)
 
                 if calc_naive:
                     cnf.naive_counts
