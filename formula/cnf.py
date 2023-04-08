@@ -1,4 +1,6 @@
 from typing import Iterable, List
+import pathos
+import os
 import numpy as np
 
 
@@ -172,7 +174,9 @@ class CNF(Formula):
             n = self.num_vars
             N = 2 ** n
             bs = [bin(i)[2:].zfill(n) for i in range(N)]
-            self.counts = np.array([self.assignment_weight(b) for b in bs], dtype=np.float32)
+            with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
+                counts = list(executor.map(self.assignment_weight, bs))
+                self.counts = np.array(counts, dtype=np.float32)
         return self.counts
 
     def __repr__(self) -> str:
