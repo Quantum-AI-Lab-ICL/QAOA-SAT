@@ -5,6 +5,7 @@ from pysat.solvers import Glucose4
 from pathos.multiprocessing import ProcessingPool as Pool
 import h5py
 import torch 
+import pathos            
 
 from formula.clause import Clause
 from formula.variable import Variable
@@ -41,12 +42,28 @@ class RandomKSAT:
             suffix (int, optional): File suffix. Defaults to cnf.
 
         Returns:
-            str: Filename correspondin to CNF problem.
+            str: Filename corresponding to CNF problem.
         """
-        dir = f'/vol/bitbucket/ae719/instances/n_{n}'
+        dir = RandomKSAT.directory(n, k)
         cnf_filename = f'{dir}/f_n{n}_k{k}_{index}.{suffix}'
         return cnf_filename
 
+    @classmethod
+    def directory(cls, n: int, k: int) -> str:
+        """Get directory corresponding to CNF problem type.
+
+        Args:
+            n (int): Number of variables per instance.
+            k (int): Variables per clause per instance.
+
+        Returns:
+            str: Filename corresponding to CNF type.
+        """
+        if os.getenv('MACHINE') == 'LAB':
+            return f'/vol/bitbucket/ae719/instances/n_{n}'
+        else:
+            parent_dir = os.path.dirname(os.getcwd())
+            return f"{parent_dir}/benchmark/instances/n_{n}"
 
     @classmethod
     def variables_from_count(cls, c: int) -> List[Variable]:
@@ -219,7 +236,12 @@ class RandomKSAT:
                 if calc_naive:
                     cnf.naive_counts
 
-                cnfs.append(cnf)
-                i += 1
+            # Set satisfiability tries to 100 to avoid stack overflow
+            gs = [100 for _ in range(instances)]
+            if parallelise:
+                with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
+                    cnfs = list(executor.map(generate, gs))
+            else:
+                cnfs = [generate(t) for t in gs] 
 
         return cls(n, k, r, cnfs)
