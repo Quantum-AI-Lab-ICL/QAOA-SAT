@@ -173,7 +173,7 @@ class RandomKSAT:
 
     @classmethod
     def from_poisson(
-        cls, n: int, k: int, r: int = None, satisfiable=False, instances: int = 1, from_file: int = None, calc_naive: bool = False, parallelise: bool = False
+        cls, n: int, k: int, r: int = None, satisfiable=True, instances: int = 1, from_file: int = None, calc_naive: bool = False, parallelise: bool = False
     ) -> None:
         """Create problem instance as per [BM22]:
 
@@ -181,7 +181,7 @@ class RandomKSAT:
             n (int): Number of variables per instance.
             k (int): Variables per clause per instance.
             r (int, optional): Clauses to variables ratio for poisson method. Defaults to satisfiability ratio.
-            satisfiable (bool) : Ensures the instances generated are satisfiable. Defaults to False.
+            satisfiable (bool) : Ensures the instances generated are satisfiable. Defaults to True.
             instances (int): Number of instances to generate. Defaults to 1.
             from_file (int): If not None, retrieve from previously generated files starting at index provided. Defaults to None.
             calc_naive (bool): Find number of unsatisfied clauses per bistring in formulas. Defaults to False.
