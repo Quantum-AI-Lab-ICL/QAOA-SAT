@@ -244,6 +244,8 @@ class RandomKSAT:
                 if calc_naive:
                     cnf.naive_counts
 
+                return cnf
+
             # Set satisfiability tries to 100 to avoid stack overflow
             gs = [100 for _ in range(instances)]
             if parallelise:

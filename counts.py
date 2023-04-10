@@ -6,7 +6,6 @@ from formula.cnf import CNF
 
 def main(n, k, i):
 	cnf = CNF.from_file(RandomKSAT.filename(n, k, i))
-	cnf.to_file()
 	counts = cnf.naive_counts
 	with h5py.File(RandomKSAT.filename(n, k, i, 'hdf5'), 'w') as file:
 		file.create_dataset('counts', data=counts)

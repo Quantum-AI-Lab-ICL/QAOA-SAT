@@ -5,9 +5,9 @@ import os
 from benchmark.random_k_sat import RandomKSAT
 
 def main(n, k, i):
-	cnf = RandomKSAT.from_poisson(n, k, calc_naive=True).formulas[0]
-	cnf.to_file(RandomKSAT.filename(n, k, i + 1100))
-	with h5py.File(RandomKSAT.filename(n, k, i + 1100, 'hdf5'), 'w') as file:
+	cnf = RandomKSAT.from_poisson(n, k, satisfiable=True, calc_naive=True).formulas[0]
+	cnf.to_file(RandomKSAT.filename(n, k, i))
+	with h5py.File(RandomKSAT.filename(n, k, i, 'hdf5'), 'w') as file:
 		file.create_dataset('counts', data=cnf.naive_counts)
 
 if __name__ == '__main__':
