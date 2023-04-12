@@ -60,10 +60,10 @@ class RandomKSAT:
             str: Filename corresponding to CNF type.
         """
         if os.getenv('MACHINE') == 'LAB':
-            return f'/vol/bitbucket/ae719/instances/n_{n}'
+            return f'/vol/bitbucket/ae719/instances/ksat/k_{k}/n_{n}'
         else:
             parent_dir = os.path.dirname(os.getcwd())
-            return f"{parent_dir}/benchmark/instances/n_{n}"
+            return f"{parent_dir}/benchmark/instances/ksat/k_{k}/n_{n}"
 
     @classmethod
     def variables_from_count(cls, c: int) -> List[Variable]:
