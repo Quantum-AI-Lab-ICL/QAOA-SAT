@@ -6,4 +6,4 @@ source activate
 
 export MACHINE="LAB"
 
-python psucc.py $1 $2 $3 $4
+python mrt.py $1 $2 $3 $4 $5

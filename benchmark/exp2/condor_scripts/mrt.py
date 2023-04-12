@@ -4,11 +4,14 @@ import h5py
 import torch
 import pathos
 from torch.distributions.categorical import Categorical
+from functools import partial
 
 from benchmark.random_k_sat import RandomKSAT
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 
 def main(n, k, index, instances, timeout):
+
+    timeout = timeout * n
     
     # Consider batch size
     index = index * instances
@@ -35,10 +38,10 @@ def main(n, k, index, instances, timeout):
         # Initialise QAOA circuit
         circuit = PytorchCircuit(n, p, params[0], params[1])
 
-        def rt(formula):
+        def rt(formula, pc):
             # Emulate sampling
             counts = formula.naive_counts
-            final_state = circuit.evolve(counts)
+            final_state = pc.evolve(counts)
             ps = (final_state * final_state.conj()).real
             m = Categorical(ps)
 
@@ -60,8 +63,12 @@ def main(n, k, index, instances, timeout):
             if tf:
                 print('TIMEOUT')
 
-        with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
-            times = torch.tensor(executor.map(rt, formulas))
+            print(runtime)
+            return runtime
+
+        times = torch.tensor([rt(f, circuit) for f in formulas])
+        #with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
+        #    times = torch.tensor(executor.map(partial(rt, pc=circuit), formulas))
 
         # Save to file
         with h5py.File(f'res/rt_{n}_{k}_{p}_{index}.hdf5', 'w') as file:
