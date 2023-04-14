@@ -1,12 +1,10 @@
 import argparse
-import os
 import h5py
 import torch
-import pathos
 from torch.distributions.categorical import Categorical
-from functools import partial
 
-from benchmark.random_k_sat import RandomKSAT
+from benchmark.generator.ksat_generator import KSATGenerator
+from benchmark.random_problem import RandomProblem
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 
 def main(n, k, index, instances, timeout):
@@ -19,11 +17,13 @@ def main(n, k, index, instances, timeout):
     print('Loading instances')
 
     # Read in random problems
-    formulas = RandomKSAT.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True).formulas
+    generator = KSATGenerator()
+    rp = RandomProblem(generator=generator)
+    formulas = rp.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True).formulas
 
     # Read in parameters
     # Params generated for n = 12 regardless of instance size
-    dir = RandomKSAT.directory(12, k)
+    dir = generator.directory(12, k)
     optimal_params_r = {}
     ps = [1, 2, 4, 8, 16]
     for p in ps:

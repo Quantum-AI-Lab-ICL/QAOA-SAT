@@ -1,13 +1,15 @@
 import argparse
 import h5py
-import os
 
-from benchmark.random_k_sat import RandomKSAT
+from benchmark.random_problem import RandomProblem
+from benchmark.generator.ksat_generator import KSATGenerator
 
 def main(n, k, i):
-	cnf = RandomKSAT.from_poisson(n, k, satisfiable=True, calc_naive=True).formulas[0]
-	cnf.to_file(RandomKSAT.filename(n, k, i))
-	with h5py.File(RandomKSAT.filename(n, k, i, 'hdf5'), 'w') as file:
+	generator = KSATGenerator()
+	rp = RandomProblem(generator=generator)
+	cnf = rp.from_poisson(n, k, satisfiable=True, calc_naive=True).formulas[0]
+	cnf.to_file(generator.filename(n, k, i))
+	with h5py.File(generator.filename(n, k, i, 'hdf5'), 'w') as file:
 		file.create_dataset('counts', data=cnf.naive_counts)
 
 if __name__ == '__main__':
