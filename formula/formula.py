@@ -141,18 +141,3 @@ class Formula(ABC):
         raise NotImplementedError(
             "Attempted invocation of abstract base formula class method"
         )
-
-    @abstractproperty
-    def naive_counts(self) -> Iterable[int]:
-        """Finds number of unsatisfied clauses for all bitstrings. Use singleton pattern to only evaluate once.
-
-        Returns:
-            Iterable[int]: Number of unsatisfied clauses in bistring order.
-
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class method.
-
-        """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base formula class method"
-        )
