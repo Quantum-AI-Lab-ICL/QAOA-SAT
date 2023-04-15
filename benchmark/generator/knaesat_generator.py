@@ -23,8 +23,10 @@ class KNAESATGenerator(KSATGenerator):
 		Returns:
 			str: Filename corresponding to CNF problem.
 		"""
+		# Offset due to condor jobs (not worth redoing/naming)
+		offset = 100000
 		dir = self.directory(n, k)
-		cnf_filename = f'{dir}/f_n{n}_k{k}_{index}.{suffix}'
+		cnf_filename = f'{dir}/f_n{n}_k{k}_{index + offset}.{suffix}'
 		return cnf_filename
 
 	def directory(self, n: int, k: int) -> str:
