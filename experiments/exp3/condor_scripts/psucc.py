@@ -15,7 +15,7 @@ def main(n, k, index, instances):
     print('Loading instances')
 
     # Read in random problems
-    generator = KSATGenerator()
+    generator = KNAESATGenerator()
     rp = RandomProblem(generator=generator)
     formulas = rp.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True).formulas
 

@@ -7,7 +7,7 @@ from benchmark.generator.knaesat_generator import KNAESATGenerator
 def main(n, k, i):
 	generator = KNAESATGenerator()
 	rp = RandomProblem(generator=generator)
-	cnf = rp.from_poisson(n, k, satisfiable=True, calc_naive=True).formulas[0]
+	cnf = rp.from_poisson(n, k, satisfiable=True, calc_naive=True)[0]
 	cnf.to_file(generator.filename(n, k, i))
 	with h5py.File(generator.filename(n, k, i, 'hdf5'), 'w') as file:
 		file.create_dataset('counts', data=cnf.naive_counts)
