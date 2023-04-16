@@ -58,12 +58,12 @@ class RandomProblem:
 		if from_file is not None:
 			
 			# Retrieve instances from previously written files
-			indices = [i + from_file for i in range(instances)]
+			indices = [(i + from_file,) for i in range(instances)]
 			if parallelise:
 				with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
-					cnfs = list(executor.map(partial(self.generator.from_file, n=n, k=k, calc_naive=calc_naive), indices))
+					cnfs = list(executor.map(partial(self.generator.from_file, n, k, calc_naive), indices))
 			else:
-				cnfs = [self.generator(n, k, i, calc_naive) for i in indices] 
+				cnfs = [self.generator.from_file(n, k, i, calc_naive) for i in indices] 
 
 		else:
 			# Use approximate satisfiability if r not specified
