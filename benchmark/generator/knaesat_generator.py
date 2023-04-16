@@ -82,7 +82,8 @@ class KNAESATGenerator(KSATGenerator):
 		with Glucose4(bootstrap_with=f.to_pysat().clauses) as g:
 			for x in g.enum_models():
 				# Checks x satisfies f in NAE formulation
-				if f.is_satisfied(x):
+				bs = [1 if v > 0 else 0 for v in x]
+				if f.is_satisfied(bs):
 					return True
 		return False
 
