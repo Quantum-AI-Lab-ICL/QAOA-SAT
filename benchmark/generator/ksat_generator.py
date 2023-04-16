@@ -1,8 +1,10 @@
-from typing import List
+from typing import Iterable, List
 import os
+import h5py
 from pysat.solvers import Glucose4
 
 from benchmark.generator.generator import Generator
+from formula.formula import Formula
 from formula.variable import Variable
 from formula.cnf import CNF
 from benchmark.ratios import sat_ratios
@@ -47,6 +49,26 @@ class KSATGenerator(Generator):
             parent_dir = os.path.dirname(os.getcwd())
             return f"{parent_dir}/benchmark/instances/ksat/k_{k}/n_{n}"
 
+    def from_file(self, n: int, k: int, index: int = 0, calc_naive: bool = False) -> Formula:
+        """Get problem from file.
+
+        Args:
+            n (int): Number of variables per instance.
+            k (int): Variables per clause per instance.
+            index (int, optional): File index. Defaults to 0.
+            calc_naive (bool, optional): Read in unsat counts. Defaults to False.
+
+        Returns:
+            Formula: Problem instance.
+        """
+        cnf_filename = self.filename(n, k, index)
+        counts_filename = self.filename(n, k, index, 'hdf5')
+        cnf = CNF.from_file(cnf_filename)
+        if calc_naive:
+            with h5py.File(counts_filename, 'r') as f:
+                cnf.counts = f.get('counts')[:]
+        return cnf
+
     def variables_from_count(self, c: int) -> List[Variable]:
         """Generate $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
 
@@ -87,3 +109,12 @@ class KSATGenerator(Generator):
         """
 
         return sat_ratios[k] 
+
+    def empty_formula(self) -> Formula:
+        """Empty formula.
+
+        Returns:
+            Formula: Empty formula.
+        """
+
+        return CNF()

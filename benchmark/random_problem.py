@@ -1,11 +1,10 @@
-import h5py
-import torch 
 import pathos            
 import os
 import numpy as np
 from typing import List
 from benchmark.generator.knaesat_generator import KNAESATGenerator
 from benchmark.generator.ksat_generator import KSATGenerator
+from functools import partial
 
 from formula.cnf import CNF
 from formula.formula import Formula
@@ -53,28 +52,18 @@ class RandomProblem:
 			parallelise (bool): Parallelise creation. Defaults to False.
 
 		Returns:
-			CNF: Random problem instances created using poisson method.
+			List[Formula]: Random problem instances created using poisson method.
 		"""
+
 		if from_file is not None:
 			
-			def retrieve(index):
-				cnf_filename = self.generator.filename(n, k, index)
-				cnf = CNF.from_file(cnf_filename)
-
-				# Retrieve unsat clauses counts
-				if calc_naive:
-					counts_filename = self.generator.filename(n, k, index, 'hdf5')
-					with h5py.File(counts_filename, 'r') as f:
-						cnf.counts = torch.from_numpy(f.get('counts')[:])
-				return cnf
-
 			# Retrieve instances from previously written files
 			indices = [i + from_file for i in range(instances)]
 			if parallelise:
 				with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
-					cnfs = list(executor.map(retrieve, indices))
+					cnfs = list(executor.map(partial(self.generator.from_file, n=n, k=k, calc_naive=calc_naive), indices))
 			else:
-				cnfs = [retrieve(i) for i in indices] 
+				cnfs = [self.generator(n, k, i, calc_naive) for i in indices] 
 
 		else:
 			# Use approximate satisfiability if r not specified
@@ -85,7 +74,7 @@ class RandomProblem:
 				if t < 0:
 					raise RuntimeError("Avoiding stack overflow, check satisfiability.")
 				# Set up formula
-				cnf = CNF()
+				cnf = self.generator.empty_formula()
 
 				# Set up variables
 				variables = self.generator.variables_from_count(n)
@@ -120,7 +109,6 @@ class RandomProblem:
 
 		return cnfs
 
-
 	def from_exhaustive(
 		self, n: int, m: int, k: int, satisfiable=False, instances: int = 1
 	) -> List[Formula]:
@@ -150,7 +138,7 @@ class RandomProblem:
 		while i < instances:
 
 			# Set up formula
-			cnf = CNF()
+			cnf = self.generator.empty_formula()
 
 			# Set up variables
 			variables = self.generator.variables_from_count(n)

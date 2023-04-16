@@ -10,32 +10,32 @@ class NAECNF(CNF):
 	def __init__(self, clauses: List[Clause] = None) -> None:
 		super().__init__(clauses)
 
-	@property
-	def naive_sats(self) -> Iterable[int]:
-		"""Finds all satisfying bitstrings in NAE formulation. 
-		Where x satisfies NAESAT iff x and -x satisfy SAT.
-		Use singleton pattern to only evaluate once.
+	def is_satisfied(self, assignment: str) -> bool:
+		"""Checks whether assignment provided satisfies the formula in NAE formulation.
+
+		Args:
+			assignment (str): Assignment, 1 corresponds to true and 0 to false.
 
 		Returns:
-			Iterable[int]: Value at index 1 iff bitstring satisfies, in bistring order.
-
+			bool: True iff every clause satisfied but literals not same to truth value.
 		"""
-		if self.sats is None:
-			sats = super().naive_sats
-			nsats = 2 ** self.num_vars - 1 - sats
-			self.sats = np.intersect1d(sats, nsats)
-		return self.sats
+		if len(assignment) != self.num_vars:
+			raise RuntimeError(
+				f"Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}"
+			)
+		return all([c.is_satisfied(assignment) and not c.all_same(assignment) for c in self.clauses])
 
-	@property
-	def naive_counts(self) -> Iterable[int]:
-		"""Finds number of unsatisfied clauses for all bitstrings in NAE formulation.
-		Where h^NAE(x) = h(x) + h(-x)
-		Use singleton pattern to only evaluate once.
+	def assignment_weight(self, assignment: str) -> float:
+		"""Count of unsatisfied clauses.
+
+		Args:
+			assignment (str): Assignment of variables in clauses.
 
 		Returns:
-			Iterable[int]: Number of unsatisfied clauses in bistring order.
+			float: Weight of assignment.
 		"""
-		if self.counts is None:
-			counts = super().naive_counts
-			self.counts = counts + counts[::-1]
-		return self.counts
+		if len(assignment) != self.num_vars:
+			raise RuntimeError(
+				f"Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}"
+			)
+		return sum([not c.is_satisfied(assignment) or c.all_same(assignment) for c in self.clauses])

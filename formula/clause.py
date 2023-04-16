@@ -60,7 +60,7 @@ class Clause:
         """Determines whether clause is satisfied by assignment.
 
         Args:
-            assignment (str): Assignment for entire formula.
+            assignment (str): Assignment for variables.
 
         Returns:
             bool: True iff clause is satisfied
@@ -68,6 +68,17 @@ class Clause:
         return self.always_sat or any(
             [v.is_satisfied(assignment) for v in self.variables]
         )
+
+    def all_same(self, assignment: str) -> bool:
+        """Determines whether literals in clause all set to same truth value.
+
+        Args:
+            assignment (str): Assignment for variables.
+
+        Returns:
+            bool: True iff all literals set to same truth value.
+        """
+        return all([v.is_satisfied(assignment) for v in self.variables])
 
     def parity(self, vars: List[Variable] = None) -> int:
         """Parity of clause (as defined in notebook.)

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Iterable, List
 
 from formula.variable import Variable
 from formula.formula import Formula
@@ -16,6 +16,27 @@ class Generator(ABC):
 
 		raise NotImplementedError(
 			"Attempted initialisation of abstract base class"
+		)
+	
+	@abstractmethod
+	def from_file(self, n: int, k: int, index: int = 0, calc_naive: bool = False) -> Formula:
+		"""Get problem from file.
+
+		Args:
+			n (int): Number of variables per instance.
+			k (int): Variables per clause per instance.
+			index (int, optional): File index. Defaults to 0.
+            calc_naive (bool, optional): Read in unsat counts. Defaults to False.
+
+		Returns:
+			Formula: Problem instance.
+
+        Raises:
+            NotImplementedError: Attempted invocation of abstract base class method.
+
+        """
+		raise NotImplementedError(
+			"Attempted invocation of abstract base class method"
 		)
 
 	@abstractmethod
@@ -103,6 +124,21 @@ class Generator(ABC):
 
 		Returns:
 			float: Satisfiability ratio for value of k.
+
+        Raises:
+            NotImplementedError: Attempted invocation of abstract base class method.
+
+        """
+		raise NotImplementedError(
+			"Attempted invocation of abstract base class method"
+		)
+
+	@abstractmethod
+	def empty_formula(self) -> Formula:
+		"""Empty formula.
+
+		Returns:
+			Formula: Empty formula.
 
         Raises:
             NotImplementedError: Attempted invocation of abstract base class method.

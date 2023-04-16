@@ -91,7 +91,7 @@ class CNF(Formula):
         return self.clauses[index]
 
     def is_satisfied(self, assignment: str) -> bool:
-        """Checks whether assignment provided satifies the formula.
+        """Checks whether assignment provided satisfies the formula.
 
         Args:
             assignment (str): Assignment, 1 corresponds to true and 0 to false.
@@ -103,6 +103,7 @@ class CNF(Formula):
             raise RuntimeError(
                 f"Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}"
             )
+        # Could call assignment weight == 0 but 'all' allows for lazy evaluation
         return all([c.is_satisfied(assignment) for c in self.clauses])
 
     def assignment_weight(self, assignment: str) -> float:
@@ -160,7 +161,7 @@ class CNF(Formula):
         """
         if self.sats is None:
             naive_counts = self.naive_counts
-            self.sats = np.where(naive_counts == 0.) 
+            self.sats = np.where(naive_counts == 0.)[0] 
         return self.sats
 
     @property

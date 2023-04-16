@@ -3,7 +3,7 @@ import h5py
 import json
 import torch
 
-from benchmark.generator.ksat_generator import KSATGenerator
+from benchmark.generator.knaesat_generator import KNAESATGenerator
 from benchmark.random_problem import RandomProblem
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 
