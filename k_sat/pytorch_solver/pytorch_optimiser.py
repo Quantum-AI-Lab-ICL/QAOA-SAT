@@ -32,7 +32,7 @@ class PytorchOptimiser():
 		"""
 
 		# extract clause counts 
-		counts = [(f.naive_counts, f.naive_sats) for f in formulas]
+		counts = [(torch.from_numpy(f.naive_counts), torch.from_numpy(f.naive_sats)) for f in formulas]
 
 		# optimise
 		for i in range(self.epochs + 1):
