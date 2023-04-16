@@ -1,4 +1,4 @@
-from typing import Iterable, List
+from typing import List
 import os
 import h5py
 from pysat.solvers import Glucose4
@@ -85,11 +85,11 @@ class KSATGenerator(Generator):
 
         return variables
 
-    def is_satisfiable(self, f: CNF) -> bool:
+    def is_satisfiable(self, f: Formula) -> bool:
         """Verify if formula is satisfiable.
 
         Args:
-            f (CNF): Formula to check satisfiability of.
+            f (Formula): Formula to check satisfiability of.
 
         Returns:
             bool: Boolean variable set to true iff formula is satisfiable.

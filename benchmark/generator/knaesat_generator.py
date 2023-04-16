@@ -1,4 +1,3 @@
-from typing import Iterable
 from pysat.solvers import Glucose4
 import os
 import h5py
@@ -70,22 +69,20 @@ class KNAESATGenerator(KSATGenerator):
 				cnf.counts = counts + counts[::-1]
 		return cnf
 
-	def is_satisfiable(self, f: CNF) -> bool:
+	def is_satisfiable(self, f: NAECNF) -> bool:
 		"""Verify if formula is NAE satisfiable.
 
 		Args:
-			f (CNF): Formula to check satisfiability of.
+			f (NAECNF): Formula to check satisfiability of.
 
 		Returns:
 			bool: Boolean variable set to true iff formula is satisfiable.
 		"""
 
-		# Bitstring x NAE satisfies if both x and -x satisfy
 		with Glucose4(bootstrap_with=f.to_pysat().clauses) as g:
 			for x in g.enum_models():
-				# Check if -x satisfies
-				nx = ['1' if v < 0 else '0' for v in x]
-				if f.is_satisfied(nx):
+				# Checks x satisfies f in NAE formulation
+				if f.is_satisfied(x):
 					return True
 		return False
 
