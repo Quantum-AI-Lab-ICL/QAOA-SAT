@@ -12,7 +12,7 @@ def main(n, k, p):
 	generator = KNAESATGenerator()
 	rp = RandomProblem(generator=generator)
 	# 100 training instances
-	formulas = rp.from_poisson(n, k, satisfiable=True, instances = 100, from_file = 0, calc_naive=True)
+	formulas = rp.from_poisson(n, k, satisfiable=True, instances = 100, from_file = 0, calc_naive=True, parallelise=True)
 
 	circuit = PytorchCircuit(num_vars=n, layers=p)
 	adam = torch.optim.Adam(circuit.parameters(), lr=0.1, maximize=True)

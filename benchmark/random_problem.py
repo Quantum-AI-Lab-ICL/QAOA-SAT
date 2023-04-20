@@ -58,7 +58,7 @@ class RandomProblem:
 		if from_file is not None:
 			
 			# Retrieve instances from previously written files
-			indices = [(i + from_file,) for i in range(instances)]
+			indices = [i + from_file for i in range(instances)]
 			if parallelise:
 				with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
 					cnfs = list(executor.map(partial(self.generator.from_file, n, k, calc_naive), indices))

@@ -49,14 +49,14 @@ class KSATGenerator(Generator):
             parent_dir = os.path.dirname(os.getcwd())
             return f"{parent_dir}/benchmark/instances/ksat/k_{k}/n_{n}"
 
-    def from_file(self, n: int, k: int, index: int = 0, calc_naive: bool = False) -> Formula:
+    def from_file(self, n: int, k: int, calc_naive: bool = False, index: int = 0) -> Formula:
         """Get problem from file.
 
         Args:
             n (int): Number of variables per instance.
             k (int): Variables per clause per instance.
-            index (int, optional): File index. Defaults to 0.
             calc_naive (bool, optional): Read in unsat counts. Defaults to False.
+            index (int, optional): File index. Defaults to 0.
 
         Returns:
             Formula: Problem instance.

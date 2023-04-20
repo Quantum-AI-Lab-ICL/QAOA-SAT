@@ -1,6 +1,4 @@
 import argparse
-import pathos
-import os
 import json
 import h5py
 import torch
@@ -22,8 +20,9 @@ def main(n, k, index, instances, timeout):
     # Read in random problems
     generator = KNAESATGenerator()
     rp = RandomProblem(generator=generator)
-    formulas = rp.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True).formulas
+    formulas = rp.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True)
 
+    print('Reading in parameters')
     # Read in parameters
     # Params generated for n = 12 regardless of instance size
     dir = generator.directory(12, k)
@@ -46,16 +45,19 @@ def main(n, k, index, instances, timeout):
 
         # Evolve each instance, take mean of p_succ and store run times
         def eval(formula):
-            h = formula.naive_counts
-            hS = formula.naive_sats
+
+            h = torch.from_numpy(formula.naive_counts)
+            hS = torch.from_numpy(formula.naive_sats)
+            
             # Evolve
             final_state = circuit.evolve(h).detach().clone()
 
             # p_succ
-            prob = circuit.succ_prob(final_state, hS)
+            prob = circuit.succ_prob(final_state, hS).item()
 
             # Emulate sampling
-            m = Categorical(final_state)
+            ps = (final_state * final_state.conj()).real
+            m = Categorical(ps)
 
             # Timeout flag
             tf = False
@@ -75,20 +77,22 @@ def main(n, k, index, instances, timeout):
             if tf:
                 print('TIMEOUT')
 
-            print(runtime)
             return runtime, prob 
 
+        print('Evaluating formulas')
+
         # Calculate and store results
-        with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
-            results = executor.map(eval, formulas)
+        results = [eval(f) for f in formulas]
         times, prob = zip(*results)
+        """
         with h5py.File(f'res/rt_{n}_{k}_{p}_{index}.hdf5', 'w') as file:
             file.create_dataset(f'times', data=torch.tensor(times))
         p_succ[n][p] = sum(prob)
 
     # Save psucc to file
-    with open(f'res/p_succ_{n}_{index}.json', 'w') as f:
+    with open(f'res/p_succ_{n}_{k}_{index}.json', 'w') as f:
         json.dump(p_succ, f)
+        """
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

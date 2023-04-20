@@ -6,4 +6,4 @@ source activate
 
 export MACHINE="LAB"
 
-python mrt.py $1 $2 $3 $4 $5
+python evaluate.py $1 $2 $3 $4 $5
