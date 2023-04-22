@@ -4,14 +4,13 @@ import h5py
 
 from benchmark.generator.ksat_generator import KSATGenerator
 from benchmark.ratios import nae_sat_ratios
-from formula.cnf import CNF
 from formula.formula import Formula
 from formula.nae_cnf import NAECNF
 
+
 class KNAESATGenerator(KSATGenerator):
-    
     def __init__(self) -> None:
-        """Generator for random k-nae-sat problems. """
+        """Generator for random k-nae-sat problems."""
         pass
 
     def filename(self, n: int, k: int, index: int = 0, suffix: str = "cnf") -> str:
@@ -40,13 +39,15 @@ class KNAESATGenerator(KSATGenerator):
         Returns:
             str: Filename corresponding to CNF type.
         """
-        if os.getenv('MACHINE') == 'LAB':
-            return f'/vol/bitbucket/ae719/instances/knaesat/k_{k}/n_{n}'
+        if os.getenv("MACHINE") == "LAB":
+            return f"/vol/bitbucket/ae719/instances/knaesat/k_{k}/n_{n}"
         else:
             parent_dir = os.path.dirname(os.getcwd())
             return f"{parent_dir}/benchmark/instances/knaesat/k_{k}/n_{n}"
 
-    def from_file(self, n: int, k: int, calc_naive: bool = False, index: int = 0) -> Formula:
+    def from_file(
+        self, n: int, k: int, calc_naive: bool = False, index: int = 0
+    ) -> Formula:
         """Get problem from file.
 
         Args:
@@ -60,11 +61,11 @@ class KNAESATGenerator(KSATGenerator):
         """
         # TODO: if redo condor job, get rid of this method...
         cnf_filename = self.filename(n, k, index)
-        counts_filename = self.filename(n, k, index, 'hdf5')
+        counts_filename = self.filename(n, k, index, "hdf5")
         cnf = NAECNF.from_file(cnf_filename)
         if calc_naive:
-            with h5py.File(counts_filename, 'r') as f:
-                counts = f.get('counts')[:]
+            with h5py.File(counts_filename, "r") as f:
+                counts = f.get("counts")[:]
                 # NAE counts as h(x) + h(-x)
                 cnf.counts = counts + counts[::-1]
         return cnf
@@ -96,7 +97,7 @@ class KNAESATGenerator(KSATGenerator):
         Returns:
             float: Satisfiability ratio for value of k.
         """
-        return nae_sat_ratios[k] 
+        return nae_sat_ratios[k]
 
     def empty_formula(self) -> Formula:
         """Empty formula.

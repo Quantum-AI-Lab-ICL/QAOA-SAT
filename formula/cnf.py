@@ -40,7 +40,7 @@ class CNF(Formula):
             c = Clause()
             for var in clause:
                 # PySat starts numbering at 1 and uses negative to indicate negation
-                v = Variable(abs(var) - 1, is_negation = var < 0)
+                v = Variable(abs(var) - 1, is_negation=var < 0)
                 c.append(v)
             clauses.append(c)
         return cls(clauses)
@@ -161,7 +161,7 @@ class CNF(Formula):
         """
         if self.sats is None:
             naive_counts = self.naive_counts
-            self.sats = np.where(naive_counts == 0.)[0] 
+            self.sats = np.where(naive_counts == 0.0)[0]
         return self.sats
 
     @property
@@ -173,7 +173,7 @@ class CNF(Formula):
         """
         if self.counts is None:
             n = self.num_vars
-            N = 2 ** n
+            N = 2**n
             bs = [bin(i)[2:].zfill(n) for i in range(N)]
             with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
                 counts = list(executor.map(self.assignment_weight, bs))

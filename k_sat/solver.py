@@ -11,9 +11,7 @@ class Solver(ABC):
             NotImplementedError: Attempted initialistion of abstract base class.
 
         """
-        raise NotImplementedError(
-            "Attempted initialistion of abstract base class "
-        )
+        raise NotImplementedError("Attempted initialistion of abstract base class ")
 
     @abstractmethod
     def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
@@ -29,6 +27,4 @@ class Solver(ABC):
         Raises:
             NotImplementedError: Attempted invocation of abstract base class method.
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base class method"
-        )
+        raise NotImplementedError("Attempted invocation of abstract base class method")

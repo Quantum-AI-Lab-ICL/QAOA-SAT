@@ -7,8 +7,8 @@ from formula.clause import Clause
 
 PySATFormula = Union[PySATCNF, PySATWCNF]
 
-class Formula(ABC):
 
+class Formula(ABC):
     @abstractmethod
     def __init__(self, clauses: List[Clause] = None) -> None:
         """Class representing Boolean formula.
@@ -79,7 +79,7 @@ class Formula(ABC):
         raise NotImplementedError(
             "Attempted invocation of abstract base formula class method"
         )
-    
+
     @classmethod
     @abstractmethod
     def from_pysat(cls, formula: PySATFormula) -> None:
@@ -110,7 +110,7 @@ class Formula(ABC):
         raise NotImplementedError(
             "Attempted invocation of abstract base formula class method"
         )
-    
+
     @classmethod
     @abstractmethod
     def from_file(cls, filename: str) -> None:

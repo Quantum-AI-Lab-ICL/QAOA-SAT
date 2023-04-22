@@ -1,4 +1,4 @@
-import pathos            
+import pathos
 import os
 import numpy as np
 from typing import List
@@ -11,8 +11,8 @@ from formula.formula import Formula
 from formula.clause import Clause
 from benchmark.generator.generator import Generator
 
+
 class RandomProblem:
-    
     def __init__(self, type: str = None, generator: Generator = None) -> None:
         """Create random problem instances for benchmarking.
 
@@ -26,18 +26,26 @@ class RandomProblem:
         """
         if generator is None and type is None:
             raise RuntimeError("Must either provide generator or generator type")
-        
+
         if generator is not None:
             self.generator = generator
-        elif type == 'ksat':
+        elif type == "ksat":
             self.generator = KSATGenerator()
-        elif type == 'knaesat':
+        elif type == "knaesat":
             self.generator = KNAESATGenerator()
         else:
             raise RuntimeError("Generator type not recognised")
 
     def from_poisson(
-        self, n: int, k: int, r: int = None, satisfiable=True, instances: int = 1, from_file: int = None, calc_naive: bool = False, parallelise: bool = False
+        self,
+        n: int,
+        k: int,
+        r: int = None,
+        satisfiable=True,
+        instances: int = 1,
+        from_file: int = None,
+        calc_naive: bool = False,
+        parallelise: bool = False,
     ) -> List[Formula]:
         """Create problem instance as per [BM22]:
 
@@ -56,14 +64,18 @@ class RandomProblem:
         """
 
         if from_file is not None:
-            
+
             # Retrieve instances from previously written files
             indices = [i + from_file for i in range(instances)]
             if parallelise:
                 with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
-                    cnfs = list(executor.map(partial(self.generator.from_file, n, k, calc_naive), indices))
+                    cnfs = list(
+                        executor.map(
+                            partial(self.generator.from_file, n, k, calc_naive), indices
+                        )
+                    )
             else:
-                cnfs = [self.generator.from_file(n, k, calc_naive, i) for i in indices] 
+                cnfs = [self.generator.from_file(n, k, calc_naive, i) for i in indices]
 
         else:
             # Use approximate satisfiability if r not specified
@@ -72,7 +84,9 @@ class RandomProblem:
 
             def generate(t: int):
                 if t < 0:
-                    raise RuntimeError("Avoiding stack overflow, check satisfiability or var num.")
+                    raise RuntimeError(
+                        "Avoiding stack overflow, check satisfiability or var num."
+                    )
                 # Set up formula
                 cnf = self.generator.empty_formula()
 
@@ -92,13 +106,13 @@ class RandomProblem:
                 if satisfiable and not self.generator.is_satisfiable(cnf):
                     print("Unsatisfiable formula generated, trying again")
                     # t to avoid stack overflow!
-                    return generate(t-1)
+                    return generate(t - 1)
 
                 # If formula does not have correct number of variables, try again
                 if cnf.num_vars != n:
                     print("Not enough unique variables drawn, trying again")
                     # t to avoid stack overflow!
-                    return generate(t-1)
+                    return generate(t - 1)
 
                 if calc_naive:
                     cnf.naive_counts
@@ -111,7 +125,7 @@ class RandomProblem:
                 with pathos.multiprocessing.Pool(os.cpu_count() - 1) as executor:
                     cnfs = list(executor.map(generate, gs))
             else:
-                cnfs = [generate(t) for t in gs] 
+                cnfs = [generate(t) for t in gs]
 
         return cnfs
 

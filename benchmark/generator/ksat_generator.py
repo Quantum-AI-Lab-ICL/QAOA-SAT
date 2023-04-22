@@ -11,11 +11,9 @@ from benchmark.ratios import sat_ratios
 
 
 class KSATGenerator(Generator):
-
     def __init__(self) -> None:
-        """Generator for random k-sat problems. """
+        """Generator for random k-sat problems."""
         pass
-
 
     def filename(self, n: int, k: int, index: int = 0, suffix: str = "cnf") -> str:
         """Get filename corresponding to CNF problem.
@@ -30,7 +28,7 @@ class KSATGenerator(Generator):
             str: Filename corresponding to CNF problem.
         """
         dir = self.directory(n, k)
-        cnf_filename = f'{dir}/f_n{n}_k{k}_{index}.{suffix}'
+        cnf_filename = f"{dir}/f_n{n}_k{k}_{index}.{suffix}"
         return cnf_filename
 
     def directory(self, n: int, k: int) -> str:
@@ -43,13 +41,15 @@ class KSATGenerator(Generator):
         Returns:
             str: Filename corresponding to CNF type.
         """
-        if os.getenv('MACHINE') == 'LAB':
-            return f'/vol/bitbucket/ae719/instances/ksat/k_{k}/n_{n}'
+        if os.getenv("MACHINE") == "LAB":
+            return f"/vol/bitbucket/ae719/instances/ksat/k_{k}/n_{n}"
         else:
             parent_dir = os.path.dirname(os.getcwd())
             return f"{parent_dir}/benchmark/instances/ksat/k_{k}/n_{n}"
 
-    def from_file(self, n: int, k: int, calc_naive: bool = False, index: int = 0) -> Formula:
+    def from_file(
+        self, n: int, k: int, calc_naive: bool = False, index: int = 0
+    ) -> Formula:
         """Get problem from file.
 
         Args:
@@ -62,11 +62,11 @@ class KSATGenerator(Generator):
             Formula: Problem instance.
         """
         cnf_filename = self.filename(n, k, index)
-        counts_filename = self.filename(n, k, index, 'hdf5')
+        counts_filename = self.filename(n, k, index, "hdf5")
         cnf = CNF.from_file(cnf_filename)
         if calc_naive:
-            with h5py.File(counts_filename, 'r') as f:
-                cnf.counts = f.get('counts')[:]
+            with h5py.File(counts_filename, "r") as f:
+                cnf.counts = f.get("counts")[:]
         return cnf
 
     def variables_from_count(self, c: int) -> List[Variable]:
@@ -97,7 +97,7 @@ class KSATGenerator(Generator):
 
         with Glucose4(bootstrap_with=f.to_pysat().clauses) as g:
             return g.solve()
-    
+
     def ratio(self, k: int) -> float:
         """Satisfiability ratio for k-SAT problem.
 
@@ -108,7 +108,7 @@ class KSATGenerator(Generator):
             float: Satisfiability ratio for value of k.
         """
 
-        return sat_ratios[k] 
+        return sat_ratios[k]
 
     def empty_formula(self) -> Formula:
         """Empty formula.
