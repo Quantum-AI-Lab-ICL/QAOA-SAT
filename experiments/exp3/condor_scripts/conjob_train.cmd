@@ -1,7 +1,7 @@
 universe = vanilla
 executable = train.sh
-output = uname.$(k).out
-error = uname.$(k).err
+output = uname.$(k).$(p).out
+error = uname.$(k).$(p).err
 requirements = (OpSysVer == 2204)
-arguments = 12 $(k) 16
-queue k from seq 3 10|
+arguments = $(n) $(k) $(p)
+queue

@@ -84,7 +84,6 @@ def main(n, k, index, instances, timeout):
         # Calculate and store results
         results = [eval(f) for f in formulas]
         times, prob = zip(*results)
-        """
         with h5py.File(f'res/rt_{n}_{k}_{p}_{index}.hdf5', 'w') as file:
             file.create_dataset(f'times', data=torch.tensor(times))
         p_succ[n][p] = sum(prob)
@@ -92,7 +91,6 @@ def main(n, k, index, instances, timeout):
     # Save psucc to file
     with open(f'res/p_succ_{n}_{k}_{index}.json', 'w') as f:
         json.dump(p_succ, f)
-        """
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
