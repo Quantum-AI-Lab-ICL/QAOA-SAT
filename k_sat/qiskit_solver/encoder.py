@@ -11,25 +11,18 @@ class Encoder(ABC):
         Raises:
             NotImplementedError: Attempted initialisation of abstract base encoder class.
         """
-        raise NotImplementedError(
-            "Attempted initialisation of abstract base encoder class"
-        )
+        pass
 
     @abstractmethod
     def encode_formula(self, formula: Formula, p: int = 1) -> QuantumCircuit:
         """Encode formula into quantum circuit.
 
         Args:
-                        formula (Formula): Boolean formula to be encoded.
-                        p (int, optional): Number of repeated layers in circuit. Defaults to 1.
+            formula (Formula): Boolean formula to be encoded.
+            p (int, optional): Number of repeated layers in circuit. Defaults to 1.
 
         Returns:
-                        QuantumCircuit: Circuit encoding formula.
-
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base encoder class method.
-
+            QuantumCircuit: Circuit encoding formula.
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base encoder class method"
-        )
+        pass
+

@@ -5,13 +5,8 @@ from formula.cnf.cnf import CNF
 
 class Solver(ABC):
     def __init__(self):
-        """Abstract Solver class to be extended.
-
-        Raises:
-            NotImplementedError: Attempted initialistion of abstract base class.
-
-        """
-        raise NotImplementedError("Attempted initialistion of abstract base class ")
+        """Abstract Solver class to be extended."""
+        pass
 
     @abstractmethod
     def sat(self, formula: CNF, timeout: int = None) -> Tuple[str, int]:
@@ -23,8 +18,5 @@ class Solver(ABC):
 
         Returns:
             Tuple[str, int]: Tuple of satisfying assignment and runtime to find it. String set to "-1" formula unsatisfiable/solver timed out.
-
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base class method.
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass

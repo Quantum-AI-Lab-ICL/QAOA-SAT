@@ -11,13 +11,9 @@ class Clause(ABC):
 
 		Args:
 			variables (List[Variable], optional): Variables within clause. Defaults to None.
-
-		Raises:
-			NotImplementedError: Attempted initialisation of abstract base formula class.
 		"""
-		raise NotImplementedError(
-			"Attempted initialisation of abstract base clause class"
-		)
+		pass
+
 
 	@abstractproperty
 	def num_vars(self) -> int:
@@ -25,13 +21,8 @@ class Clause(ABC):
 
 		Returns:
 			int: Number of variables in clause.
-
-		Raises:
-			NotImplementedError: Attempted initialisation of abstract base formula class.
 		"""
-		raise NotImplementedError(
-			"Attempted initialisation of abstract base clause class"
-		)
+		pass
 
 	@abstractmethod
 	def append(self, variable: Variable) -> None:
@@ -39,13 +30,8 @@ class Clause(ABC):
 
 		Args:
 			variable (Variable): Variable to add to end of clause.
-
-		Raises:
-			NotImplementedError: Attempted initialisation of abstract base formula class.
 		"""
-		raise NotImplementedError(
-			"Attempted initialisation of abstract base clause class"
-		)
+		pass
 
 	@abstractmethod
 	def get_variable(self, index: int) -> Variable:
@@ -56,13 +42,8 @@ class Clause(ABC):
 
 		Returns:
 			Variable: Variable at index position in clause.
-
-		Raises:
-			NotImplementedError: Attempted initialisation of abstract base formula class.
 		"""
-		raise NotImplementedError(
-			"Attempted initialisation of abstract base clause class"
-		)
+		pass
 
 	@abstractmethod
 	def is_satisfied(self, assignment: str) -> bool:
@@ -73,13 +54,8 @@ class Clause(ABC):
 
 		Returns:
 			bool: True iff clause is satisfied
-
-		Raises:
-			NotImplementedError: Attempted initialisation of abstract base formula class.
 		"""
-		raise NotImplementedError(
-			"Attempted initialisation of abstract base clause class"
-		)
+		pass
 
 	@abstractmethod
 	def all_same(self, assignment: str) -> bool:
@@ -90,10 +66,5 @@ class Clause(ABC):
 
 		Returns:
 			bool: True iff all literals set to same truth value.
-
-		Raises:
-			NotImplementedError: Attempted initialisation of abstract base formula class.
 		"""
-		raise NotImplementedError(
-			"Attempted initialisation of abstract base clause class"
-		)
+		pass

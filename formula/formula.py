@@ -11,25 +11,17 @@ class Formula(ABC):
 
         Args:
             clauses (List[Clause], optional): Clauses of formula. Defaults to no clauses.
-
-        Raises:
-            NotImplementedError: Attempted initialisation of abstract base formula class.
         """
-        raise NotImplementedError(
-            "Attempted initialisation of abstract base formula class"
-        )
+        pass
 
     @abstractproperty
     def num_vars(self) -> int:
         """Number of variables in formula.
 
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class property.
-
+        Returns:
+            int: Number of variables in formula.
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base formula class property"
-        )
+        pass
 
     @abstractmethod
     def is_satisfied(self, assignment: str) -> bool:
@@ -38,13 +30,10 @@ class Formula(ABC):
         Args:
             assignment (str): Assignment for variables in clauses.
 
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class method.
-
+        Returns:
+            bool: True iff formula satisfied by assignment.
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base formula class method"
-        )
+        pass
 
     @abstractmethod
     def assignment_weight(self, assignment: str) -> float:
@@ -53,13 +42,22 @@ class Formula(ABC):
         Args:
             assignment (str): Assignment of variables in clauses.
 
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class method.
-
+        Returns:
+            float: Assignment weight.
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base formula class method"
-        )
+        pass
+
+    @abstractmethod
+    def unsatisfied_clauses(self, assignment: str) -> List[Clause]:
+        """Find clauses unsatisfied by assignment.
+
+        Args:
+            assignment (str): Assignment of variables in clauses.
+
+        Returns:
+            List[Clause]: _description_
+        """
+        pass
 
     @abstractproperty
     def naive_sats(self) -> Iterable[int]:
@@ -67,14 +65,8 @@ class Formula(ABC):
 
         Returns:
             Iterable[int]: Value at index 1 iff bitstring satisfies, in bistring order.
-
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class method.
-
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base formula class method"
-        )
+        pass
 
     @abstractmethod
     def random_assignment(self) -> str:
@@ -82,11 +74,5 @@ class Formula(ABC):
 
         Returns:
             str: Bitstring corresponding to assignment.
-
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base formula class method.
-
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base formula class method"
-        )
+        pass

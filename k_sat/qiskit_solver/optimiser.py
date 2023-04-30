@@ -13,29 +13,19 @@ class Optimiser(ABC):
 
         Args:
             quantum_instance (QuantumInstace, optional): Backend to run optimiser on. Defaults to Aer qasm simulator.
-
-        Raises:
-            NotImplementedError: Attempted initialisation of abstract base optimiser class.
         """
-
-        raise NotImplementedError(
-            "Attempted initialisation of abstract base optimiser class"
-        )
+        pass
 
     @abstractmethod
     def find_optimal_params(
         self, circuits: List[Tuple[Formula, QuantumCircuit]]
     ) -> List[float]:
-        """Encode formula into quantum circuit.
+        """Find optimal parameters for circuits.
 
         Args:
             circuits (List[Tuple[Formula, QuantumCircuit]]): Circuits and corresponding formulas to optimise over.
 
-
-        Raises:
-            NotImplementedError: Attempted invocation of abstract base optimiser class method.
-
+        Returns:
+            List[float]: Optimal parameters.
         """
-        raise NotImplementedError(
-            "Attempted invocation of abstract base optimiser class method"
-        )
+        pass

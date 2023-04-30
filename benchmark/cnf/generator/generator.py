@@ -9,13 +9,8 @@ from formula.cnf.cnf import CNF
 class Generator(ABC):
     @abstractmethod
     def __init__(self) -> None:
-        """Generator for random problems.
-
-        Raises:
-            NotImplementedError: Attempted initialisation of abstract base class.
-        """
-
-        raise NotImplementedError("Attempted initialisation of abstract base class")
+        """Generator for random problems."""
+        pass
 
     @abstractmethod
     def from_file(
@@ -31,12 +26,8 @@ class Generator(ABC):
 
             Returns:
                 CNF: Problem instance.
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def filename(self, n: int, k: int, index: int = 0, suffix: str = "cnf") -> str:
@@ -51,11 +42,8 @@ class Generator(ABC):
             Returns:
                 str: Filename corresponding to CNF problem.
 
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def directory(self, n: int, k: int) -> str:
@@ -67,12 +55,8 @@ class Generator(ABC):
 
             Returns:
                 str: Filename corresponding to CNF type.
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def variables_from_count(self, c: int) -> List[Variable]:
@@ -83,12 +67,8 @@ class Generator(ABC):
 
             Returns:
                 List[Variable]: $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def is_satisfiable(self, f: CNF) -> bool:
@@ -99,12 +79,8 @@ class Generator(ABC):
 
             Returns:
                 bool: Boolean variable set to true iff formula is satisfiable.
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def ratio(self, k: int) -> float:
@@ -115,12 +91,8 @@ class Generator(ABC):
 
             Returns:
                 float: Satisfiability ratio for value of k.
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def empty_formula(self) -> CNF:
@@ -128,12 +100,8 @@ class Generator(ABC):
 
             Returns:
                 CNF: Empty formula.
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
 
     @abstractmethod
     def empty_clause(self) -> DisjunctiveClause:
@@ -141,9 +109,5 @@ class Generator(ABC):
 
             Returns:
                 DisjunctiveClause: Empty clause.
-
-            Raises:
-                NotImplementedError: Attempted invocation of abstract base class method.
-
         """
-        raise NotImplementedError("Attempted invocation of abstract base class method")
+        pass
