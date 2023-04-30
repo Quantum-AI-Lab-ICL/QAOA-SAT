@@ -5,7 +5,7 @@ from qiskit import Aer
 from qiskit.visualization import plot_histogram
 from matplotlib.figure import Figure
 
-from formula.formula import Formula
+from formula.cnf.cnf import CNF
 from k_sat.solver import Solver
 from k_sat.qiskit_solver.encoder import Encoder
 from k_sat.qiskit_solver.optimiser import Optimiser
@@ -19,7 +19,7 @@ class QiskitSolver(Solver):
 
     def __init__(
         self,
-        training_formulas: List[Formula] = None,
+        training_formulas: List[CNF] = None,
         layers: int = 1,
         quantum_instance: QuantumInstance = None,
         init_params: List[float] = None,
@@ -29,7 +29,7 @@ class QiskitSolver(Solver):
         """Intialise Quantum Solver for k-SAT.
 
         Args:
-            training_formulas (List[Formula], optional): Formulas to use for parameter optimisation. Defaults to formula.
+            training_formulas (List[CNF], optional): CNFs to use for parameter optimisation. Defaults to formula.
             layers (int, optional): Number of layers in ansatzes. Defaults to 1.
             quantum_instance (QuantumInstace, optional): Backend to run quantum solver on. Defaults to Aer qasm simulator.
             encoder (Encoder, optional): Encoder to encode formula into circuit. Defaults to PauliEncoder.
@@ -69,11 +69,11 @@ class QiskitSolver(Solver):
             optimiser = AverageOptimiser(quantum_instance)
         self.optimiser = optimiser
 
-    def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
+    def sat(self, formula: CNF, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula.
 
         Args:
-            formula (Formula): Formula to find satisfying assignment of.
+            formula (CNF): CNF to find satisfying assignment of.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:
@@ -107,14 +107,14 @@ class QiskitSolver(Solver):
 
     def visualise_result(
         self,
-        formula: Formula,
+        formula: CNF,
         plot_num: int = 10,
         shots: int = 10000,
     ) -> Figure:
         """Visualise output of solving circuit for given formula.
 
         Args
-                formula (Formula): Formula to visualise encoded circuit of.
+                formula (CNF): CNF to visualise encoded circuit of.
                 plot_num (int, optional): Number of bitstrings to plot (sorted in descending order of counts). Defaults to 10.
                 shots (int, optional): Samples to draw from circuit. Defaults to 10000.
 

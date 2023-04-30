@@ -4,10 +4,10 @@ import subprocess
 from typing import Tuple
 
 from k_sat.solver import Solver
-from formula.formula import Formula
+from formula.cnf.cnf import CNF
 
 
-class WalkSATlm(Solver):
+class WSlmCPPSolver(Solver):
     """Python interface for WalkSATlm solver [Cai15]"""
 
     def __init__(
@@ -27,11 +27,11 @@ class WalkSATlm(Solver):
         self.w1 = w1
         self.w2 = w2
 
-    def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
+    def sat(self, formula: CNF, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula using WalkSatlm C++ implementation.
 
         Args:
-            formula (Formula): Formula to find satisfying assignment for.
+            formula (CNF): Formula to find satisfying assignment for.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:

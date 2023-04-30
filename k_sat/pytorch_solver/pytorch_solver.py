@@ -4,12 +4,12 @@ from typing import List, Tuple
 from k_sat.solver import Solver
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 from k_sat.pytorch_solver.pytorch_optimiser import PytorchOptimiser
-from formula.formula import Formula
+from formula.cnf.cnf import CNF
 
 
 class PytorchSolver(Solver):
     def __init__(
-        self, training_formulas: List[Formula] = None, layers: int = 1
+        self, training_formulas: List[CNF] = None, layers: int = 1
     ) -> None:
         """Pytorch implementation of QAOA for satisfiability.
 
@@ -20,11 +20,11 @@ class PytorchSolver(Solver):
         self.training_formulas = training_formulas
         self.layers = layers
 
-    def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
+    def sat(self, formula: CNF, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula.
 
         Args:
-            formula (Formula): Formula to find satisfying assignment for.
+            formula (CNF): Formula to find satisfying assignment for.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:

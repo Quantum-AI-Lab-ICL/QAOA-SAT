@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
-from formula.formula import Formula
+from formula.cnf.cnf import CNF
 
 
 class Solver(ABC):
@@ -14,11 +14,11 @@ class Solver(ABC):
         raise NotImplementedError("Attempted initialistion of abstract base class ")
 
     @abstractmethod
-    def sat(self, formula: Formula, timeout: int = None) -> Tuple[str, int]:
+    def sat(self, formula: CNF, timeout: int = None) -> Tuple[str, int]:
         """Finds statisfying assignment of formula.
 
         Args:
-            formula (Formula): Formula to find satisfying assignment for.
+            formula (CNF): Formula to find satisfying assignment for.
             timeout (int, optional): Timeout for algorithm if no satisfying assignment found yet. Defaults to None (keep going until solution found).
 
         Returns:
