@@ -2,7 +2,7 @@ import argparse
 import h5py
 
 from benchmark.cnf.generator.ksat_generator import KSATGenerator 
-from formula.cnf import CNF
+from formula.cnf.cnf import CNF
 
 def main(n, k, i):
 	generator = KSATGenerator()

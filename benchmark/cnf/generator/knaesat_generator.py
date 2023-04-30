@@ -6,7 +6,7 @@ from benchmark.cnf.generator.ksat_generator import KSATGenerator
 from benchmark.cnf.ratios import nae_sat_ratios
 from formula.formula import Formula
 from formula.nae.nae_clause import NAEClause
-from formula.nae.naef import NAECNF
+from formula.nae.naef import NAEFormula
 
 
 class KNAESATGenerator(KSATGenerator):
@@ -63,7 +63,7 @@ class KNAESATGenerator(KSATGenerator):
         # TODO: if redo condor job, get rid of this method...
         cnf_filename = self.filename(n, k, index)
         counts_filename = self.filename(n, k, index, "hdf5")
-        cnf = NAECNF.from_file(cnf_filename)
+        cnf = NAEFormula.from_file(cnf_filename)
         if calc_naive:
             with h5py.File(counts_filename, "r") as f:
                 counts = f.get("counts")[:]
@@ -71,11 +71,11 @@ class KNAESATGenerator(KSATGenerator):
                 cnf.counts = counts + counts[::-1]
         return cnf
 
-    def is_satisfiable(self, f: NAECNF) -> bool:
+    def is_satisfiable(self, f: NAEFormula) -> bool:
         """Verify if formula is NAE satisfiable.
 
         Args:
-            f (NAECNF): Formula to check satisfiability of.
+            f (NAEFormula): Formula to check satisfiability of.
 
         Returns:
             bool: Boolean variable set to true iff formula is satisfiable.
@@ -107,7 +107,7 @@ class KNAESATGenerator(KSATGenerator):
             Formula: Empty formula.
         """
 
-        return NAECNF()
+        return NAEFormula()
 
     def empty_clause(self) -> NAEClause:
         """ Empty Clause.

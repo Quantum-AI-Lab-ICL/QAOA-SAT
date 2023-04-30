@@ -1,4 +1,4 @@
-from formula.cnf import CNF
+from formula.cnf.cnf import CNF
 from formula.cnf.disjunctive_clause import DisjunctiveClause
 from typing import List, Tuple
 from pysat.formula import WCNF as PySATWCNF

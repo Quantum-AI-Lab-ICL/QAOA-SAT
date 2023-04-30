@@ -1,6 +1,6 @@
 from typing import List
 
-from formula.cnf import CNF
+from formula.cnf.cnf import CNF
 from formula.nae.nae_clause import NAEClause
 
 
@@ -11,7 +11,7 @@ class NAEFormula(CNF):
         Args:
             clauses (List[NAEClause], optional): Clauses within formula. Defaults to None.
         """
-        assert all([isinstance(c, NAEClause) for c in clauses])
+        assert clauses is None or all([isinstance(c, NAEClause) for c in clauses])
         super().__init__(clauses)
 
     def append(self, clause: NAEClause) -> None:

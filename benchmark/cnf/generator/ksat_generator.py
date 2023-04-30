@@ -7,7 +7,7 @@ from benchmark.cnf.generator.generator import Generator
 from formula.cnf.disjunctive_clause import DisjunctiveClause
 from formula.formula import Formula
 from formula.variable import Variable
-from formula.cnf import CNF
+from formula.cnf.cnf import CNF
 from benchmark.cnf.ratios import sat_ratios
 
 class KSATGenerator(Generator):
