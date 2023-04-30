@@ -1,12 +1,12 @@
 import argparse
 import h5py
 
-from benchmark.random_problem import RandomProblem
-from benchmark.generator.knaesat_generator import KNAESATGenerator
+from benchmark.cnf.random_cnf import RandomCNF
+from benchmark.cnf.generator.knaesat_generator import KNAESATGenerator
 
 def main(n, k, i):
     generator = KNAESATGenerator()
-    rp = RandomProblem(generator=generator)
+    rp = RandomCNF(generator=generator)
     cnf = rp.from_poisson(n, k, satisfiable=True, calc_naive=True)[0]
     cnf.to_file(generator.filename(n, k, i))
     if len(cnf.naive_counts) != 2 ** n:

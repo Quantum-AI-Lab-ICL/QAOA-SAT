@@ -1,16 +1,15 @@
-import os
 import argparse
 import h5py
 import torch
 
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 from k_sat.pytorch_solver.pytorch_optimiser import PytorchOptimiser
-from benchmark.random_problem import RandomProblem
-from benchmark.generator.knaesat_generator import KNAESATGenerator
+from benchmark.cnf.random_cnf import RandomCNF
+from benchmark.cnf.generator.knaesat_generator import KNAESATGenerator
 
 def main(n, k, p):
 	generator = KNAESATGenerator()
-	rp = RandomProblem(generator=generator)
+	rp = RandomCNF(generator=generator)
 	# 100 training instances
 	formulas = rp.from_poisson(n, k, satisfiable=True, instances = 100, from_file = 0, calc_naive=True, parallelise=True)
 

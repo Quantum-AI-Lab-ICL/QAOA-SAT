@@ -1,12 +1,12 @@
 from formula.cnf import CNF
-from formula.clause import Clause
+from formula.cnf.disjunctive_clause import DisjunctiveClause
 from typing import List, Tuple
 from pysat.formula import WCNF as PySATWCNF
 
 
 class WCNF(CNF):
     def __init__(
-        self, clauses: List[Clause] = None, weights: List[float] = None
+        self, clauses: List[DisjunctiveClause] = None, weights: List[float] = None
     ) -> None:
         """Weighted CNF formula.
 
@@ -20,7 +20,7 @@ class WCNF(CNF):
         self.weights = weights
 
     @property
-    def weighted_clauses(self) -> List[Tuple[Clause, float]]:
+    def weighted_clauses(self) -> List[Tuple[DisjunctiveClause, float]]:
         """Zipped clauses and weights
 
         Returns:
@@ -28,7 +28,7 @@ class WCNF(CNF):
         """
         return zip(self.clauses, self.weights)
 
-    def append(self, clause: Clause, weight: float = 1) -> None:
+    def append(self, clause: DisjunctiveClause, weight: float = 1) -> None:
         """Add new clause to end of formula with corresponding weight.
 
         Args:

@@ -1,18 +1,17 @@
-from typing import List
+from pysat.solvers import Glucose4
 import os
 import h5py
-from pysat.solvers import Glucose4
 
-from benchmark.generator.generator import Generator
+from benchmark.cnf.generator.ksat_generator import KSATGenerator
+from benchmark.cnf.ratios import nae_sat_ratios
 from formula.formula import Formula
-from formula.variable import Variable
-from formula.cnf import CNF
-from benchmark.ratios import sat_ratios
+from formula.nae.nae_clause import NAEClause
+from formula.nae.naef import NAECNF
 
 
-class KSATGenerator(Generator):
+class KNAESATGenerator(KSATGenerator):
     def __init__(self) -> None:
-        """Generator for random k-sat problems."""
+        """Generator for random k-nae-sat problems."""
         pass
 
     def filename(self, n: int, k: int, index: int = 0, suffix: str = "cnf") -> str:
@@ -27,9 +26,9 @@ class KSATGenerator(Generator):
         Returns:
             str: Filename corresponding to CNF problem.
         """
-        dir = self.directory(n, k)
-        cnf_filename = f"{dir}/f_n{n}_k{k}_{index}.{suffix}"
-        return cnf_filename
+        # Offset due to condor jobs (not worth redoing/naming)
+        offset = 100000
+        return super().filename(n, k, index + offset, suffix)
 
     def directory(self, n: int, k: int) -> str:
         """Get directory corresponding to CNF problem type.
@@ -42,10 +41,10 @@ class KSATGenerator(Generator):
             str: Filename corresponding to CNF type.
         """
         if os.getenv("MACHINE") == "LAB":
-            return f"/vol/bitbucket/ae719/instances/ksat/k_{k}/n_{n}"
+            return f"/vol/bitbucket/ae719/instances/knaesat/k_{k}/n_{n}"
         else:
             parent_dir = os.path.dirname(os.getcwd())
-            return f"{parent_dir}/benchmark/instances/ksat/k_{k}/n_{n}"
+            return f"{parent_dir}/benchmark/instances/knaesat/k_{k}/n_{n}"
 
     def from_file(
         self, n: int, k: int, calc_naive: bool = False, index: int = 0
@@ -61,45 +60,37 @@ class KSATGenerator(Generator):
         Returns:
             Formula: Problem instance.
         """
+        # TODO: if redo condor job, get rid of this method...
         cnf_filename = self.filename(n, k, index)
         counts_filename = self.filename(n, k, index, "hdf5")
-        cnf = CNF.from_file(cnf_filename)
+        cnf = NAECNF.from_file(cnf_filename)
         if calc_naive:
             with h5py.File(counts_filename, "r") as f:
-                cnf.counts = f.get("counts")[:]
+                counts = f.get("counts")[:]
+                # NAE counts as h(x) + h(-x)
+                cnf.counts = counts + counts[::-1]
         return cnf
 
-    def variables_from_count(self, c: int) -> List[Variable]:
-        """Generate $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
+    def is_satisfiable(self, f: NAECNF) -> bool:
+        """Verify if formula is NAE satisfiable.
 
         Args:
-            count (int): Id to generate up to.
-
-        Returns:
-            List[Variable]: $\{x_0, ~x_0, ... x_{c-1}, ~x_{c-1}\}$
-        """
-        variables = []
-        for i in range(c):
-            variables.append(Variable(id=i, is_negation=False))
-            variables.append(Variable(id=i, is_negation=True))
-
-        return variables
-
-    def is_satisfiable(self, f: Formula) -> bool:
-        """Verify if formula is satisfiable.
-
-        Args:
-            f (Formula): Formula to check satisfiability of.
+            f (NAECNF): Formula to check satisfiability of.
 
         Returns:
             bool: Boolean variable set to true iff formula is satisfiable.
         """
 
         with Glucose4(bootstrap_with=f.to_pysat().clauses) as g:
-            return g.solve()
+            for x in g.enum_models():
+                # Checks x satisfies f in NAE formulation
+                bs = [1 if v > 0 else 0 for v in x]
+                if f.is_satisfied(bs):
+                    return True
+        return False
 
     def ratio(self, k: int) -> float:
-        """Satisfiability ratio for k-SAT problem.
+        """Satisfiability ratio for k-NAE-SAT problem.
 
         Args:
             k (int): Variables per clause.
@@ -107,8 +98,7 @@ class KSATGenerator(Generator):
         Returns:
             float: Satisfiability ratio for value of k.
         """
-
-        return sat_ratios[k]
+        return nae_sat_ratios[k]
 
     def empty_formula(self) -> Formula:
         """Empty formula.
@@ -117,4 +107,16 @@ class KSATGenerator(Generator):
             Formula: Empty formula.
         """
 
-        return CNF()
+        return NAECNF()
+
+    def empty_clause(self) -> NAEClause:
+        """ Empty Clause.
+
+            Returns:
+                NAEClause: Empty clause.
+
+            Raises:
+                NotImplementedError: Attempted invocation of abstract base class method.
+
+        """
+        return NAEClause()

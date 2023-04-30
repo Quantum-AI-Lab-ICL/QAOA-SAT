@@ -5,7 +5,7 @@ from qiskit.circuit import Parameter
 from itertools import combinations
 
 from formula.formula import Formula
-from formula.clause import Clause
+from formula.cnf.disjunctive_clause import DisjunctiveClause
 from k_sat.qiskit_solver.encoder import Encoder
 
 
@@ -16,12 +16,12 @@ class PauliEncoder(Encoder):
         """Initialise Pauli encoder"""
 
     def encode_clause(
-        self, clause: Clause, gamma: Parameter, circuit: QuantumCircuit
+        self, clause: DisjunctiveClause, gamma: Parameter, circuit: QuantumCircuit
     ) -> QuantumCircuit:
         """Append unitary gates encoding clause to provided quantum circuit.
 
         Args:
-                clause (Clause): Clause to be encoded.
+                clause (DisjunctiveClause): Clause to be encoded.
                 gamma (Parameter): Parameter to parameterise gates with.
                 circuit (QuantumCircuit): Circuit to append gates to.
 
@@ -68,11 +68,11 @@ class PauliEncoder(Encoder):
         """Encodes formula into circuit using (decomposed) Z-Pauli gates.
 
         Args:
-                        formula (Formula): Boolean formula to be encoded.
-                        p (int, optional): Number of repeated layers in circuit. Defaults to 1.
+            formula (Formula): Boolean formula to be encoded.
+            p (int, optional): Number of repeated layers in circuit. Defaults to 1.
 
-                Returns:
-                        QuantumCircuit: Circuit encoding formula.
+        Returns:
+            QuantumCircuit: Circuit encoding formula.
         """
         n = formula.num_vars
         qc = QuantumCircuit(n)
@@ -84,7 +84,6 @@ class PauliEncoder(Encoder):
         # Create alternating mixer and cost gates
         for i in range(p):
 
-            # TODO: optimise to not re-encode clause each time for p > 1
             # Cost gates
             gamma = Parameter(f"y_{i}")
             for clause in formula.clauses:

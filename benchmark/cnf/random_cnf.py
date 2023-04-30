@@ -2,19 +2,17 @@ import pathos
 import os
 import numpy as np
 from typing import List
-from benchmark.generator.knaesat_generator import KNAESATGenerator
-from benchmark.generator.ksat_generator import KSATGenerator
 from functools import partial
 
-from formula.cnf import CNF
-from formula.formula import Formula
-from formula.clause import Clause
-from benchmark.generator.generator import Generator
+from formula.cnf.cnf import CNF
+from benchmark.cnf.generator.generator import Generator
+from benchmark.cnf.generator.knaesat_generator import KNAESATGenerator
+from benchmark.cnf.generator.ksat_generator import KSATGenerator
 
 
-class RandomProblem:
+class RandomCNF:
     def __init__(self, type: str = None, generator: Generator = None) -> None:
-        """Create random problem instances for benchmarking.
+        """Create random CNF instances for benchmarking.
 
         Args:
             type (str, optional): Type of generator to use if one not provided. Defaults to None.
@@ -46,7 +44,7 @@ class RandomProblem:
         from_file: int = None,
         calc_naive: bool = False,
         parallelise: bool = False,
-    ) -> List[Formula]:
+    ) -> List[CNF]:
         """Create problem instance as per [BM22]:
 
         Args:
@@ -60,7 +58,7 @@ class RandomProblem:
             parallelise (bool): Parallelise creation. Defaults to False.
 
         Returns:
-            List[Formula]: Random problem instances created using poisson method.
+            List[CNF]: Random problem instances created using poisson method.
         """
 
         if from_file is not None:
@@ -96,7 +94,7 @@ class RandomProblem:
                 # Uniformly sample from variables
                 m = np.random.poisson(r * n)
                 for _ in range(m):
-                    clause = Clause()
+                    clause = self.generator.empty_clause()
                     for _ in range(k):
                         rand_index = int(np.random.randint(0, 2 * n))
                         clause.append(variables[rand_index])
@@ -131,7 +129,7 @@ class RandomProblem:
 
     def from_exhaustive(
         self, n: int, m: int, k: int, satisfiable=False, instances: int = 1
-    ) -> List[Formula]:
+    ) -> List[CNF]:
         """Create problem instances as follows:
             - Uniformly choose at random from $\{x_0, ~x_0, ... x_{n-1}, ~x_{n-1}\}$ without replacement until all used
             - Uniformly choose at random from ${x_0, ~x_0, ... x_{n-1}, ~x_{n-1}\}$ with replacement
@@ -166,7 +164,7 @@ class RandomProblem:
             # First use up all ids
             ids_unused = list(range(n))
             while len(ids_unused) > 0:
-                clause = Clause()
+                clause = self.generator.empty_clause()
                 for _ in range(k):
                     # All ids used up
                     if len(ids_unused) == 0:
@@ -184,7 +182,7 @@ class RandomProblem:
 
             # Now fill in the rest randomly
             for _ in range(m - len(cnf.clauses)):
-                clause = Clause()
+                clause = self.generator.empty_clause()
                 for _ in range(k):
                     rand_var = np.random.choice(variables)
                     clause.append(rand_var)

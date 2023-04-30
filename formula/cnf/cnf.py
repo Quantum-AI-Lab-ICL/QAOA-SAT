@@ -2,20 +2,20 @@ from typing import Iterable, List
 import pathos
 import os
 import numpy as np
-
+import random
 
 from formula.formula import Formula
-from formula.clause import Clause
+from formula.cnf.disjunctive_clause import DisjunctiveClause
 from formula.variable import Variable
 from pysat.formula import CNF as PySATCNF
 
 
 class CNF(Formula):
-    def __init__(self, clauses: List[Clause] = None) -> None:
+    def __init__(self, clauses: List[DisjunctiveClause] = None) -> None:
         """Class representing conjunctive normal formula.
 
         Args:
-            clauses (List[Clause], optional): Clauses within formula. Defaults to None.
+            clauses (List[DisjunctiveClause], optional): Clauses within formula. Defaults to None.
         """
         self.clauses = clauses if clauses is not None else []
         self.max_var = 0
@@ -37,7 +37,7 @@ class CNF(Formula):
 
         clauses = []
         for clause in formula.clauses:
-            c = Clause()
+            c = DisjunctiveClause()
             for var in clause:
                 # PySat starts numbering at 1 and uses negative to indicate negation
                 v = Variable(abs(var) - 1, is_negation=var < 0)
@@ -67,11 +67,11 @@ class CNF(Formula):
         # Assumes formula has x_0 ... x_max_var
         return self.max_var + 1
 
-    def append(self, clause: Clause) -> None:
+    def append(self, clause: DisjunctiveClause) -> None:
         """Append clause to formula.
 
         Args:
-            clause (Clause): Clause to append.
+            clause (DisjunctiveClause): Clause to append.
         """
         self.clauses.append(clause)
         # Check if clause contains variable not seen before.
@@ -79,14 +79,14 @@ class CNF(Formula):
             if var.id > self.max_var:
                 self.max_var = var.id
 
-    def get_clause(self, index: int) -> Clause:
+    def get_clause(self, index: int) -> DisjunctiveClause:
         """Get clause at index position in formula.
 
         Args:
             index (int): Index of clause, starts at 0.
 
         Returns:
-            Clause: Clause at index postion in formula.
+            DisjunctiveClause: Clause at index postion in formula.
         """
         return self.clauses[index]
 
@@ -107,7 +107,7 @@ class CNF(Formula):
         return all([c.is_satisfied(assignment) for c in self.clauses])
 
     def assignment_weight(self, assignment: str) -> float:
-        """Weight of assignment (count of unsatisfied clauses in case of CNF).
+        """Weight of assignment (unsatisfied clauses).
 
         Args:
             assignment (str): Assignment of variables in clauses.
@@ -179,6 +179,15 @@ class CNF(Formula):
                 counts = list(executor.map(self.assignment_weight, bs))
                 self.counts = np.array(counts, dtype=np.float32)
         return self.counts
+
+    def random_assignment(self) -> str:
+        """Make a random assignment to formula.
+
+        Returns:
+            str: Bitstring corresponding to assignment.
+
+        """
+        return ''.join(random.choice(['0', '1']) for _ in range(self.num_vars)) 
 
     def __repr__(self) -> str:
         return "∧\n".join([c.__str__() for c in self.clauses]) + "\n"

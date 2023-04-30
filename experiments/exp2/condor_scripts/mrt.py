@@ -3,8 +3,8 @@ import h5py
 import torch
 from torch.distributions.categorical import Categorical
 
-from benchmark.generator.ksat_generator import KSATGenerator
-from benchmark.random_problem import RandomProblem
+from benchmark.cnf.generator.ksat_generator import KSATGenerator
+from benchmark.cnf.random_cnf import RandomCNF
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 
 def main(n, k, index, instances, timeout):
@@ -18,7 +18,7 @@ def main(n, k, index, instances, timeout):
 
     # Read in random problems
     generator = KSATGenerator()
-    rp = RandomProblem(generator=generator)
+    rp = RandomCNF(generator=generator)
     formulas = rp.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True).formulas
 
     # Read in parameters

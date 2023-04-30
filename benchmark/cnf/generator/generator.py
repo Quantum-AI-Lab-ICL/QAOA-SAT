@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, List
+from typing import List
+from formula.cnf.disjunctive_clause import DisjunctiveClause
 
 from formula.variable import Variable
-from formula.formula import Formula
+from formula.cnf.cnf import CNF
 
 
 class Generator(ABC):
@@ -19,7 +20,7 @@ class Generator(ABC):
     @abstractmethod
     def from_file(
         self, n: int, k: int, calc_naive: bool = False, index: int = 0
-    ) -> Formula:
+    ) -> CNF:
         """ Get problem from file.
 
             Args:
@@ -29,7 +30,7 @@ class Generator(ABC):
                 index (int, optional): File index. Defaults to 0.
 
             Returns:
-                Formula: Problem instance.
+                CNF: Problem instance.
 
             Raises:
                 NotImplementedError: Attempted invocation of abstract base class method.
@@ -90,11 +91,11 @@ class Generator(ABC):
         raise NotImplementedError("Attempted invocation of abstract base class method")
 
     @abstractmethod
-    def is_satisfiable(self, f: Formula) -> bool:
+    def is_satisfiable(self, f: CNF) -> bool:
         """ Verify if formula is satisfiable.
 
             Args:
-                f (Formula): Formula to check satisfiability of.
+                f (CNF): CNF to check satisfiability of.
 
             Returns:
                 bool: Boolean variable set to true iff formula is satisfiable.
@@ -122,11 +123,24 @@ class Generator(ABC):
         raise NotImplementedError("Attempted invocation of abstract base class method")
 
     @abstractmethod
-    def empty_formula(self) -> Formula:
+    def empty_formula(self) -> CNF:
         """ Empty formula.
 
             Returns:
-                    Formula: Empty formula.
+                CNF: Empty formula.
+
+            Raises:
+                NotImplementedError: Attempted invocation of abstract base class method.
+
+        """
+        raise NotImplementedError("Attempted invocation of abstract base class method")
+
+    @abstractmethod
+    def empty_clause(self) -> DisjunctiveClause:
+        """ Empty Clause.
+
+            Returns:
+                DisjunctiveClause: Empty clause.
 
             Raises:
                 NotImplementedError: Attempted invocation of abstract base class method.

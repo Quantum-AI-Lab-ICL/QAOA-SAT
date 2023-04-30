@@ -1,12 +1,10 @@
-import argparse
-import h5py
 from os.path import exists
 
-from benchmark.random_problem import RandomProblem
-from benchmark.generator.knaesat_generator import KNAESATGenerator
+from benchmark.cnf.random_cnf import RandomCNF
+from benchmark.cnf.generator.knaesat_generator import KNAESATGenerator
 
 generator = KNAESATGenerator()
-rp = RandomProblem(generator=generator)
+rp = RandomCNF(generator=generator)
 k = 10
 for n in range(12, 21):
     print(n)

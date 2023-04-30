@@ -1,12 +1,12 @@
 import argparse
 import h5py
 
-from benchmark.random_problem import RandomProblem
-from benchmark.generator.ksat_generator import KSATGenerator
+from benchmark.cnf.random_cnf import RandomCNF
+from benchmark.cnf.generator.ksat_generator import KSATGenerator
 
 def main(n, k, i):
 	generator = KSATGenerator()
-	rp = RandomProblem(generator=generator)
+	rp = RandomCNF(generator=generator)
 	cnf = rp.from_poisson(n, k, satisfiable=True, calc_naive=True).formulas[0]
 	cnf.to_file(generator.filename(n, k, i))
 	with h5py.File(generator.filename(n, k, i, 'hdf5'), 'w') as file:
