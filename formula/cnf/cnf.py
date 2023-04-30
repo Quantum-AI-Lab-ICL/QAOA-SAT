@@ -3,6 +3,7 @@ import pathos
 import os
 import numpy as np
 import random
+from formula.clause import Clause
 
 from formula.formula import Formula
 from formula.cnf.disjunctive_clause import DisjunctiveClause
@@ -119,7 +120,7 @@ class CNF(Formula):
             raise RuntimeError(
                 f"Invalid assignment: expected length {self.num_vars}, actual length {len(assignment)}"
             )
-        return sum([not c.is_satisfied(assignment) for c in self.clauses])
+        return len(self.unsatisfied_clauses(assignment))
 
     def to_pysat(self) -> PySATCNF:
         """Converts to PySat representation of CNF formula.
@@ -188,6 +189,17 @@ class CNF(Formula):
 
         """
         return ''.join(random.choice(['0', '1']) for _ in range(self.num_vars)) 
+
+    def unsatisfied_clauses(self, assignment: str) -> List[Clause]:
+        """Find clauses unsatisfied by assignment.
+
+        Args:
+            assignment (str): Assignment of variables in clauses.
+
+        Returns:
+            List[Clause]: _description_
+        """
+        return [clause for clause in self.clauses if not clause.is_satisfied(assignment)] 
 
     def __repr__(self) -> str:
         return "∧\n".join([c.__str__() for c in self.clauses]) + "\n"
