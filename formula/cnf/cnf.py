@@ -3,7 +3,6 @@ import pathos
 import os
 import numpy as np
 import random
-from formula.clause import Clause
 
 from formula.formula import Formula
 from formula.cnf.disjunctive_clause import DisjunctiveClause
@@ -190,14 +189,14 @@ class CNF(Formula):
         """
         return ''.join(random.choice(['0', '1']) for _ in range(self.num_vars)) 
 
-    def unsatisfied_clauses(self, assignment: str) -> List[Clause]:
+    def unsatisfied_clauses(self, assignment: str) -> List[DisjunctiveClause]:
         """Find clauses unsatisfied by assignment.
 
         Args:
             assignment (str): Assignment of variables in clauses.
 
         Returns:
-            List[Clause]: _description_
+            List[DisjunctiveClause]: _description_
         """
         return [clause for clause in self.clauses if not clause.is_satisfied(assignment)] 
 

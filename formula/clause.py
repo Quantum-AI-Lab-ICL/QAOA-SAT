@@ -14,6 +14,14 @@ class Clause(ABC):
 		"""
 		pass
 
+	@abstractproperty
+	def variables(self) -> List[Variable]:
+		"""Variables in clause.
+
+		Returns:
+			List[Variable]: Variables in clause.
+		"""
+		return self.variables
 
 	@abstractproperty
 	def num_vars(self) -> int:
