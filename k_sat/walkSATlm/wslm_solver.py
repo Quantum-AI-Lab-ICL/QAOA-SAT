@@ -3,9 +3,7 @@ import random
 import numpy as np
 from scipy.stats import bernoulli
 
-from formula.cnf.disjunctive_clause import DisjunctiveClause
 from formula.cnf.cnf import CNF
-from formula.variable import Variable
 from k_sat.solver import Solver
 
 
@@ -29,10 +27,10 @@ class WSlmSolver(Solver):
 			makes = {1 : 5.0, 2 : 6.0}
 		if breaks is None:
 			breaks = {}
-		self.make_levels = np.array(makes.keys(), dtype=np.uint8)
-		self.make_weights = np.array(makes.values(), dtype=np.float32)
-		self.break_levels = np.array(breaks.keys(), dtype=np.uint8)
-		self.break_weights = np.array(breaks.values(), dtype=np.float32)
+		self.make_levels = np.array(list(makes.keys()), dtype=np.uint8)
+		self.make_weights = np.array(list(makes.values()), dtype=np.float32)
+		self.break_levels = np.array(list(breaks.keys()), dtype=np.uint8)
+		self.break_weights = np.array(list(breaks.values()), dtype=np.float32)
 
 	def flip(self, index: int, ass: str) -> str:
 		"""Return assignment with index flipped.

@@ -23,15 +23,6 @@ class DisjunctiveClause(Clause):
         )
 
     @property
-    def variables(self) -> List[Variable]:
-        """Variables in clause.
-
-        Returns:
-            List[Variable]: Variables in clause.
-        """
-        return self.variables
-
-    @property
     def num_vars(self) -> int:
         """Number of variables in clause.
 

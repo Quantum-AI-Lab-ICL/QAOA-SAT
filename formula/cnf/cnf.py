@@ -196,7 +196,7 @@ class CNF(Formula):
             assignment (str): Assignment of variables in clauses.
 
         Returns:
-            List[DisjunctiveClause]: _description_
+            List[DisjunctiveClause]: Unsatisfied clauses.
         """
         return [clause for clause in self.clauses if not clause.is_satisfied(assignment)] 
 
