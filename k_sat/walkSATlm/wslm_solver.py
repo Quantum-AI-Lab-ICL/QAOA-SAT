@@ -62,8 +62,8 @@ class WSlmSolver(Solver):
 		# I.e. we only iterate once and calculate everything we need.
 
 		# Initialise levels
-		makes = np.empty_like(self.make_levels)
-		breaks = np.empty_like(self.break_levels)
+		makes = np.zeros_like(self.make_levels)
+		breaks = np.zeros_like(self.break_levels)
 
 		# Flip variable
 		flip_ass = self.flip(v_id, curr_ass)
@@ -108,19 +108,27 @@ class WSlmSolver(Solver):
 		# Start with random assignment
 		curr_ass = formula.random_assignment()
 
-		# Currently unsatisfied clauses
-		unsat_clauses = formula.unsatisfied_clauses(curr_ass)
-
 		runtime = 0
 
 		# TODO: runtime? timeout?
-		while len(unsat_clauses) > 0 and timeout >= 0:
+		while timeout is None or timeout - runtime >= 0:
+			
 			runtime += 1
+
+			# Find new unsatisfied clauses
+			unsat_clauses = formula.unsatisfied_clauses(curr_ass)
+
+			# Current asssignment is satisfying
+			if not unsat_clauses:
+				break
 
 			# Randomly select an unsatisfied clause 
 			curr_clause = random.choice(unsat_clauses)
 
-			# Check if any variable has break = 0 
+			# Check if any variable has break = 0
+			freebie = False 
+			bbreak_min = None
+			score_max = None
 			bbreaks = np.zeros(shape=(curr_clause.num_vars, ))
 			scores = np.zeros(shape=(curr_clause.num_vars, ))
 			for i, variable in enumerate(curr_clause.variables):
@@ -128,10 +136,20 @@ class WSlmSolver(Solver):
 
 				if bbreak == 0:
 					curr_ass = self.flip(variable.id, curr_ass)
+					freebie = True
 					break
+
+				if bbreak_min is None or bbreak < bbreak_min:
+					bbreak_min = bbreak
+				
+				if score_max is None or score > score_max:
+					score_max = score
 
 				bbreaks[i] = bbreak
 				scores[i] = score
+			
+			if freebie:
+				continue
 
 			# No freebies
 			if self.noise.rvs(1) == 1:
@@ -140,7 +158,7 @@ class WSlmSolver(Solver):
 				curr_ass = self.flip(rand_var.id, curr_ass)
 			else:
 				# Find variable(s) with minimum break
-				min_breaks = np.argmin(bbreaks)
+				min_breaks = np.where(bbreaks == bbreak_min)[0]
 
 				# Decide which to flip
 				if len(min_breaks) == 1:
@@ -149,10 +167,13 @@ class WSlmSolver(Solver):
 					curr_ass = self.flip(min_var.id, curr_ass)
 				else:
 					# Settle tiebreaks with score
-					max_scores = np.argmax(scores)
+					max_scores = np.where(scores == score_max)[0]
 
 					# Choose randomly from maximums (should only really be 1)
 					max_var = curr_clause.get_variable(random.choice(max_scores))
 					curr_ass = self.flip(max_var.id, curr_ass) 
+
+		if timeout is not None and timeout - runtime < 0:
+			print('TIMEOUT')
 		
 		return curr_ass, runtime
