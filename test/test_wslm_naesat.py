@@ -6,7 +6,7 @@ from formula.variable import Variable
 from benchmark.cnf.random_cnf import RandomCNF
 from k_sat.walkSATlm.wslm_solver import WSlmSolver
 
-class TestWSLM(unittest.TestCase):
+class TestWSLMNAE(unittest.TestCase):
 
 	def setUp(self):
 		self.problem_gen = RandomCNF(type='knaesat')

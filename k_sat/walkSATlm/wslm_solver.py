@@ -112,7 +112,6 @@ class WSlmSolver(Solver):
 
 		runtime = 0
 
-		# TODO: runtime? timeout?
 		while timeout is None or timeout - runtime >= 0:
 			
 			runtime += 1
@@ -150,6 +149,7 @@ class WSlmSolver(Solver):
 				bbreaks[i] = bbreak
 				scores[i] = score
 			
+			# Flipped ass within for loop above
 			if freebie:
 				continue
 
