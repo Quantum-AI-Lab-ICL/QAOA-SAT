@@ -18,6 +18,7 @@ class Variable:
         Returns:
             bool: True iff variable satisfied.
         """
+        assert len(assignment) > self.id
         ass = bool(int(assignment[self.id]))
         return (self.is_negation and not ass) or (not self.is_negation and ass)
 

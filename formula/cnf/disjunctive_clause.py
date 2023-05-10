@@ -79,7 +79,7 @@ class DisjunctiveClause(Clause):
         Returns:
             bool: True iff all literals set to same truth value.
         """
-        return all([v.is_satisfied(assignment) for v in self.variables])
+        return all([v.is_satisfied(assignment) for v in self.variables]) or all([not v.is_satisfied(assignment) for v in self.variables])
 
     def parity(self, vars: List[Variable] = None) -> int:
         """Parity of clause (as defined in notebook.)

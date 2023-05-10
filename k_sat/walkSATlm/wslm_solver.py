@@ -16,10 +16,10 @@ class WSlmSolver(Solver):
 
 		Args:
 			p (float, optional): Noise. Defaults to 0.15.
-			makes (Dict[int, float], optional): Make levels and corresponding weights to use in linear score. 
-				Defaults to 6.0 * make_1 + 5.0 * make_2.
+			makes (Dict[int, float], optional): Make levels and corresponding weights to use in linear score.
+				make_{-l} = make_{k-l}. Defaults to 6.0 * make_1 + 5.0 * make_2.
 			breaks (Dict[int, float], optional): Break levels and corresponding weights to use in linear score.
-				Here, break_l = break(k - l). Defaults to None.
+				break_{-l} = break_{k - l}. Defaults to None.
 		"""
 
 		self.noise = bernoulli(p)
@@ -87,10 +87,12 @@ class WSlmSolver(Solver):
 			k = clause.num_vars
 
 			for i, tau in enumerate(self.make_levels):
-				makes[i] += curr_sat == (tau - 1) and flip_sat == tau
+				ktau = k + tau if tau <= 0 else tau 
+				makes[i] += curr_sat == (ktau - 1) and flip_sat == ktau
 			
 			for i, tau in enumerate(self.break_levels):
-				breaks[i] += curr_sat == (k - tau) and flip_sat == (k - tau - 1)
+				ktau = k + tau if tau <= 0 else tau 
+				breaks[i] += curr_sat == ktau and flip_sat == (ktau - 1)
 
 		return np.dot(self.break_weights, breaks) + np.dot(self.make_weights, makes), bbreak
 
