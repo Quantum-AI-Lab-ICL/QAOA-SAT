@@ -3,7 +3,7 @@ from k_sat.walkSATlm.wslm_solver import WSlmSolver
 from formula.nae.naef import NAEFormula
 
 
-class WslmBalanceSolver(WSlmSolver):
+class WSlmBalanceSolver(WSlmSolver):
 
 	def __init__(self, p: float = 0.15) -> None:
 		"""WalkSatlm implementation for NAE-SAT problem where scoring is based on how balanced each clause is.

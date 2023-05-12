@@ -4,7 +4,7 @@ from formula.nae.naef import NAEFormula
 from formula.nae.nae_clause import NAEClause
 from formula.variable import Variable
 from benchmark.cnf.random_cnf import RandomCNF
-from k_sat.walkSATlm.wslm_balance_solver import WslmBalanceSolver
+from k_sat.walkSATlm.wslm_balance_solver import WSlmBalanceSolver
 
 class TestWSLMBalance(unittest.TestCase):
 
@@ -12,7 +12,7 @@ class TestWSLMBalance(unittest.TestCase):
 		self.problem_gen = RandomCNF(type='knaesat')
 
 	def test_returns_knaesat(self):
-		wslm = WslmBalanceSolver()
+		wslm = WSlmBalanceSolver()
 
 		for n in range(12, 16):
 			problems = self.problem_gen.from_poisson(n, 3, satisfiable=True, instances=5)
@@ -36,7 +36,7 @@ class TestWSLMBalance(unittest.TestCase):
 
 		f = NAEFormula([c1, c2, c3])
 
-		wslm = WslmBalanceSolver()
+		wslm = WSlmBalanceSolver()
 
 		# Expected:
 		# c1: all literals false -(0-3)^2 = -9
