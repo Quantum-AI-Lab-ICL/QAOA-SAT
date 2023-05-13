@@ -18,10 +18,10 @@ def main(k, p, w1, w2):
     wslmb = WSlmSolver(p=p, makes={1:w1, 2:w2}, breaks={0:w1, -1:w2}) 
 
     # Evaluate running times
-    with h5py.File(f'res/rt_m2_{k}_{p}.hdf5', 'w') as file:
+    with h5py.File(f'res/rt_m2_{k}_{p}_{w1}_{w2}.hdf5', 'w') as file:
         times = [wslmm.sat(formula)[1] for formula in formulas]
         file.create_dataset(f'times', data=torch.tensor(times))
-    with h5py.File(f'res/rt_m2b2_{k}_{p}.hdf5', 'w') as file:
+    with h5py.File(f'res/rt_m2b2_{k}_{p}_{w1}_{w2}.hdf5', 'w') as file:
         times = [wslmb.sat(formula)[1] for formula in formulas]
         file.create_dataset(f'times', data=torch.tensor(times))
 
@@ -32,4 +32,4 @@ if __name__ == '__main__':
     parser.add_argument('w1', help='weight 1', type=float)
     parser.add_argument('w2', help='weight 2', type=float)
     args = parser.parse_args()
-    main(args.k, args.p)
+    main(args.k, args.p, args.w1, args.w2)
