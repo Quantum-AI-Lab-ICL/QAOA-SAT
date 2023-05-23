@@ -21,7 +21,7 @@ def main(n, k, index, instances, timeout):
     formulas = rp.from_poisson(n=n, k=k, instances=instances, from_file=index, calc_naive=True, parallelise=True)
 
     # Initialise solver with hyperparameters
-    wslm = WSlmSolver(p=0.15, makes={1:5, 2:6}) 
+    wslm = WSlmSolver(p=0.15, makes={1:6, 2:5}) 
 
     print('Evaluating formulas')
 
