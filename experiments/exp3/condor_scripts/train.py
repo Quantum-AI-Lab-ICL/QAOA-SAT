@@ -15,7 +15,7 @@ def main(n, k, p):
 
 	circuit = PytorchCircuit(num_vars=n, layers=p)
 	adam = torch.optim.Adam(circuit.parameters(), lr=0.1, maximize=True)
-	epochs = 100
+	epochs = 500
 	optimiser = PytorchOptimiser(circuit, adam, epochs=epochs)
 	optimiser.find_optimal_params(formulas)
 

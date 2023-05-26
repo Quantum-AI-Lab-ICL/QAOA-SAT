@@ -8,7 +8,7 @@ from benchmark.cnf.generator.knaesat_generator import KNAESATGenerator
 from benchmark.cnf.random_cnf import RandomCNF
 from k_sat.pytorch_solver.pytorch_circuit import PytorchCircuit
 
-def main(n, k, index, instances, timeout):
+def main(n, k, index, instances, timeout, p):
 
     timeout = timeout * n
     
@@ -27,12 +27,10 @@ def main(n, k, index, instances, timeout):
     # Params generated for n = 12 regardless of instance size
     dir = generator.directory(12, k)
     optimal_params_r = {}
-    ps = [1, 2, 4, 8, 16]
-    for p in ps:
-        with h5py.File(f'{dir}/a_params_{p}.hdf5', 'r') as file:
-            gamma = torch.from_numpy(file.get(f'gamma')[:])
-            beta = torch.from_numpy(file.get(f'beta')[:])
-            optimal_params_r[p] = (gamma, beta)
+    with h5py.File(f'{dir}/a_params_{p}.hdf5', 'r') as file:
+        gamma = torch.from_numpy(file.get(f'gamma')[:])
+        beta = torch.from_numpy(file.get(f'beta')[:])
+        optimal_params_r[p] = (gamma, beta)
 
     p_succ = {}
     p_succ[n] = {}
@@ -89,7 +87,7 @@ def main(n, k, index, instances, timeout):
         p_succ[n][p] = sum(prob)
 
     # Save psucc to file
-    with open(f'res/p_succ_{n}_{k}_{index}.json', 'w') as f:
+    with open(f'res/p_succ_{n}_{k}_{p}_{index}.json', 'w') as f:
         json.dump(p_succ, f)
 
 if __name__ == '__main__':
@@ -99,5 +97,6 @@ if __name__ == '__main__':
     parser.add_argument('index', help='file index', type=int)
     parser.add_argument('instances', help='number of files', type=int)
     parser.add_argument('timeout', help='timeout for sampling', type=int)
+    parser.add_argument('p', help='number of layers', type=int)
     args = parser.parse_args()
-    main(args.n, args.k, args.index, args.instances, args.timeout)
+    main(args.n, args.k, args.index, args.instances, args.timeout, args.p)

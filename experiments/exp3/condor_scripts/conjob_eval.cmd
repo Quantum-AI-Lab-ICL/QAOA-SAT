@@ -3,5 +3,5 @@ executable = evaluate.sh
 output = uname.out
 error = uname.err
 requirements = (OpSysVer == 2204)
-arguments = $(n) $(k) $(Process) 250 10000
-queue 10
+arguments = $(n) $(k) $(Process) 50 10000 $(p)
+queue 50
