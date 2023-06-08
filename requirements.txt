@@ -197,7 +197,6 @@ rubber==1.6.0
 scipy==1.8.0
 SCons==4.0.1
 scour==0.38.2
-screen-resolution-extra==0.0.0
 SecretStorage==3.3.1
 selinux==3.3
 Send2Trash==1.8.1b0
