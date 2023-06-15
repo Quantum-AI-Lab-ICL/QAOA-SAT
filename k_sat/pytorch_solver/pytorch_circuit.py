@@ -117,7 +117,7 @@ class PytorchCircuit(torch.nn.Module):
 
         # QAOA unitary application
         for i in range(self.layers):
-            circuit = self.cost(circuit, self.gamma[i], h)
+            circuit = self.cost(circuit, self.gamma[i], torch.tensor(h))
             circuit = self.mix(circuit, self.beta[i])
 
         return circuit

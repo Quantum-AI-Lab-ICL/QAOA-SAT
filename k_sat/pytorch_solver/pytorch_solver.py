@@ -47,6 +47,7 @@ class PytorchSolver(Solver):
         final_state = circuit.evolve(formula.naive_counts)
         ps = (final_state * final_state.conj()).real
         m = Categorical(ps)
+        print(ps)
 
         # Timeout flag
         tf = False
