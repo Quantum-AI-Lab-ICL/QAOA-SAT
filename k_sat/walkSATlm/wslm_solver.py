@@ -178,5 +178,4 @@ class WSlmSolver(Solver):
         if timeout is not None and timeout - runtime < 0:
             print('TIMEOUT')
         
-        print(runtime)
         return curr_ass, runtime
